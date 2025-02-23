@@ -1,18 +1,35 @@
-package com.beyond.bycontract.domain.model;
+package com.beyond.bycontract.adapter.infrastructure.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
-public class Folder {
+@Entity
+@Table(name = "folder")
+public class FolderEntity {
+    @Id
+    @Column(name = "id_folder")
     private String idFolder;
-    private String folderName;
-    private LocalDateTime createdAt;
-    private int size;
-    private User user;
-    private Folder parentFolder;
 
-    public Folder(String idFolder, String folderName, LocalDateTime createdAt, int size, User user, Folder parentFolder) {
+    @Column(name="folder_name")
+    private String folderName;
+
+    @Column(name="created_at", updatable=false, insertable=false)
+    private LocalDateTime createdAt;
+
+    @Column(name="size")
+    private int size;
+
+    @ManyToOne
+    @JoinColumn(name="id_user", nullable = false)
+    private UserEntity user;
+
+    @ManyToOne
+    @JoinColumn(name = "id_parent_folder")
+    private FolderEntity parentFolder;
+
+    public FolderEntity() {}
+
+    public FolderEntity(String idFolder, String folderName, LocalDateTime createdAt, int size, UserEntity user, FolderEntity parentFolder) {
         this.idFolder = idFolder;
         this.folderName = folderName;
         this.createdAt = createdAt;
@@ -53,26 +70,26 @@ public class Folder {
         this.size = size;
     }
 
-    public User getUser() {
+    public UserEntity getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserEntity user) {
         this.user = user;
     }
 
-    public Folder getParentFolder() {
+    public FolderEntity getParentFolder() {
         return parentFolder;
     }
 
-    public void setParentFolder(Folder parentFolder) {
+    public void setParentFolder(FolderEntity parentFolder) {
         this.parentFolder = parentFolder;
     }
 
     @Override
     public String toString() {
-        return "Folder{" +
-                "idFolder=" + idFolder +
+        return "FolderEntity{" +
+                "idFolder='" + idFolder + '\'' +
                 ", folderName='" + folderName + '\'' +
                 ", createdAt=" + createdAt +
                 ", size=" + size +

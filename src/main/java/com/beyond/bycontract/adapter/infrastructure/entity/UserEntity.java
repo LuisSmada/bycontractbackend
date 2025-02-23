@@ -1,15 +1,37 @@
-package com.beyond.bycontract.domain.model;
+package com.beyond.bycontract.adapter.infrastructure.entity;
 
-public class User {
+import jakarta.persistence.*;
+
+@Entity
+@Table(name="users")
+public class UserEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_user")
     private String idUser;
+
+    @Column(name = "first_name")
     private String firstName;
+
+    @Column(name="last_name")
     private String lastName;
+
+    @Column(name="email")
     private String email;
+
+    @Column(name="password")
     private String password;
 
-    public User() {}
+    public UserEntity() {}
 
-    public User(String idUser, String firstName, String lastName, String email, String password) {
+    public UserEntity(String firstName, String lastName, String email, String password) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+    }
+
+    public UserEntity(String idUser, String firstName, String lastName, String email, String password) {
         this.idUser = idUser;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -59,7 +81,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
+        return "UserEntity{" +
                 "idUser=" + idUser +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +

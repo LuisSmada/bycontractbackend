@@ -1,28 +1,21 @@
-package com.beyond.bycontract.domain.model;
+package com.beyond.bycontract.application.dto.user;
 
-public class User {
-    private String idUser;
+public class SaveUserDto {
     private String firstName;
     private String lastName;
+    private String address;
     private String email;
     private String password;
 
-    public User() {}
+    public SaveUserDto() {
+    }
 
-    public User(String idUser, String firstName, String lastName, String email, String password) {
-        this.idUser = idUser;
+    public SaveUserDto(String firstName, String lastName, String address, String email, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.address = address;
         this.email = email;
         this.password = password;
-    }
-
-    public String getIdUser() {
-        return idUser;
-    }
-
-    public void setIdUser(String idUser) {
-        this.idUser = idUser;
     }
 
     public String getFirstName() {
@@ -39,6 +32,14 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getEmail() {
@@ -59,10 +60,10 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
-                "idUser=" + idUser +
-                ", firstName='" + firstName + '\'' +
+        return "SaveUserDto{" +
+                "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
+                ", address='" + address + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';

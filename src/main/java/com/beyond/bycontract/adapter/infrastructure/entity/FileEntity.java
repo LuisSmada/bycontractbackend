@@ -1,21 +1,37 @@
-package com.beyond.bycontract.domain.model;
+package com.beyond.bycontract.adapter.infrastructure.entity;
 
+import com.beyond.bycontract.domain.model.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
-public class File {
+@Entity
+@Table(name = "file")
+public class FileEntity {
+    @Id
+    @Column(name="id_file")
     private String idFile;
+
+    @Column(name="fileName")
     private String fileName;
+
+    @Column(name="created_at", updatable=false, insertable=false)
     private LocalDateTime createdAt;
+
+    @Column(name="size")
     private int size;
-    private User user;
-    private Folder parentFolder;
 
-    public File() {}
+    @ManyToOne
+    @JoinColumn(name="id_user", nullable=false)
+    private UserEntity user;
 
-    public File(String idFile, String fileName, LocalDateTime createdAt, int size, User user, Folder parentFolder) {
+    @ManyToOne
+    @JoinColumn(name = "id_parent_folder")
+    private FolderEntity parentFolder;
+
+    public FileEntity() {}
+
+    public FileEntity(String idFile, String fileName, LocalDateTime createdAt, int size, UserEntity user, FolderEntity parentFolder) {
         this.idFile = idFile;
         this.fileName = fileName;
         this.createdAt = createdAt;
@@ -56,25 +72,25 @@ public class File {
         this.size = size;
     }
 
-    public User getUser() {
+    public UserEntity getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserEntity user) {
         this.user = user;
     }
 
-    public Folder getParentFolder() {
+    public FolderEntity getParentFolder() {
         return parentFolder;
     }
 
-    public void setParentFolder(Folder parentFolder) {
+    public void setParentFolder(FolderEntity parentFolder) {
         this.parentFolder = parentFolder;
     }
 
     @Override
     public String toString() {
-        return "File{" +
+        return "FileEntity{" +
                 "idFile=" + idFile +
                 ", fileName='" + fileName + '\'' +
                 ", createdAt=" + createdAt +
