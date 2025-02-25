@@ -24,6 +24,14 @@ public class File {
         this.parentFolder = parentFolder;
     }
 
+    public File(String idFile, String fileName, int size, User user, Folder parentFolder) {
+        this.idFile = idFile;
+        this.fileName = fileName;
+        this.size = size;
+        this.user = user;
+        this.parentFolder = parentFolder;
+    }
+
     public String getIdFile() {
         return idFile;
     }

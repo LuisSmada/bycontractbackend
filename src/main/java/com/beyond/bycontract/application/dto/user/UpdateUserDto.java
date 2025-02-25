@@ -1,35 +1,19 @@
-package com.beyond.bycontract.domain.model;
+package com.beyond.bycontract.application.dto.user;
 
-public class User {
-    private Long idUser;
+public class UpdateUserDto {
     private String firstName;
     private String lastName;
     private String email;
     private String password;
 
-    public User() {}
+    public UpdateUserDto() {
+    }
 
-    public User(String firstName, String lastName, String email, String password) {
+    public UpdateUserDto(String firstName, String lastName, String address, String email, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
-    }
-
-    public User(Long idUser, String firstName, String lastName, String email, String password) {
-        this.idUser = idUser;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-    }
-
-    public Long getIdUser() {
-        return idUser;
-    }
-
-    public void setIdUser(Long idUser) {
-        this.idUser = idUser;
     }
 
     public String getFirstName() {
@@ -66,8 +50,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
-                "idUser=" + idUser +
+        return "UpdateUserDto{" +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +

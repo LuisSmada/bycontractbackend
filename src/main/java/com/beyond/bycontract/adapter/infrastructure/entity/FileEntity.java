@@ -12,7 +12,7 @@ public class FileEntity {
     @Column(name="id_file")
     private String idFile;
 
-    @Column(name="fileName")
+    @Column(name="file_name")
     private String fileName;
 
     @Column(name="created_at", updatable=false, insertable=false)

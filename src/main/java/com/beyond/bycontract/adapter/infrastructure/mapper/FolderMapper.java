@@ -6,10 +6,23 @@ import com.beyond.bycontract.domain.model.Folder;
 public class FolderMapper {
 
     public static Folder entityToDomain(FolderEntity folderEntity) {
+        if (folderEntity == null) return null;
         return new Folder(folderEntity.getIdFolder(), folderEntity.getFolderName(), folderEntity.getCreatedAt(), folderEntity.getSize(), UserMapper.entityToDomain(folderEntity.getUser()), entityToDomain(folderEntity.getParentFolder()));
     }
 
     public static FolderEntity domainToEntity(Folder folder) {
-        return new FolderEntity(folder.getIdFolder(), folder.getFolderName(), folder.getCreatedAt(), folder.getSize(), UserMapper.domainToEntity(folder.getUser()), domainToEntity(folder.getParentFolder()));
+
+        if (folder == null) return null;
+
+        FolderEntity folderEntity = new FolderEntity();
+        if(folder.getIdFolder() != null) {
+            folderEntity.setIdFolder(folder.getIdFolder());
+        }
+        folderEntity.setFolderName(folder.getFolderName());
+        folderEntity.setCreatedAt(folder.getCreatedAt());
+        folderEntity.setSize(folder.getSize());
+        folderEntity.setUser(UserMapper.domainToEntity(folder.getUser()));
+        folderEntity.setParentFolder(folder.getParentFolder() != null ? domainToEntity(folder.getParentFolder()) : null);
+        return folderEntity;
     }
 }

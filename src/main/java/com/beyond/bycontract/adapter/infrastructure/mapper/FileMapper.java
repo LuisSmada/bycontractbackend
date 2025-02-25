@@ -1,7 +1,6 @@
 package com.beyond.bycontract.adapter.infrastructure.mapper;
 
 import com.beyond.bycontract.adapter.infrastructure.entity.FileEntity;
-import com.beyond.bycontract.application.dto.file.SaveFileDto;
 import com.beyond.bycontract.domain.model.File;
 
 public class FileMapper {
@@ -10,6 +9,16 @@ public class FileMapper {
     }
 
     public static FileEntity domainToEntity(File file) {
-        return new FileEntity(file.getIdFile(), file.getFileName(), file.getCreatedAt(), file.getSize(), UserMapper.domainToEntity(file.getUser()), FolderMapper.domainToEntity(file.getParentFolder()));
+        FileEntity fileEntity = new FileEntity();
+        if(file.getIdFile() != null) {
+            fileEntity.setIdFile(file.getIdFile());
+        }
+        fileEntity.setFileName(file.getFileName());
+        fileEntity.setCreatedAt(file.getCreatedAt());
+        fileEntity.setSize(file.getSize());
+        fileEntity.setUser(UserMapper.domainToEntity(file.getUser()));
+        fileEntity.setParentFolder(FolderMapper.domainToEntity(file.getParentFolder()));
+        return fileEntity;
     }
+
 }

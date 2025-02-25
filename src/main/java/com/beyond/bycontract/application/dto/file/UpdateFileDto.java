@@ -1,29 +1,18 @@
 package com.beyond.bycontract.application.dto.file;
 
-public class SaveFileDto {
-
-    private String idFile;
+public class UpdateFileDto {
     private String fileName;
     private int size;
     private Long idUser;
     private String idParentFolder;
 
-    public SaveFileDto() {}
+    public UpdateFileDto() {}
 
-    public SaveFileDto(String idFile, String fileName, int size, Long idUser, String idParentFolder) {
-        this.idFile = idFile;
+    public UpdateFileDto(String idFile, String fileName, int size, Long idUser, String idParentFolder) {
         this.fileName = fileName;
         this.size = size;
         this.idUser = idUser;
         this.idParentFolder = idParentFolder;
-    }
-
-    public String getIdFile() {
-        return idFile;
-    }
-
-    public void setIdFile(String idFile) {
-        this.idFile = idFile;
     }
 
     public String getFileName() {
@@ -60,11 +49,10 @@ public class SaveFileDto {
 
     @Override
     public String toString() {
-        return "SaveFileDto{" +
-                "idFile='" + idFile + '\'' +
-                ", fileName='" + fileName + '\'' +
+        return "UpdateFileDto{" +
+                "fileName='" + fileName + '\'' +
                 ", size=" + size +
-                ", idUser='" + idUser + '\'' +
+                ", idUser=" + idUser +
                 ", idParentFolder='" + idParentFolder + '\'' +
                 '}';
     }

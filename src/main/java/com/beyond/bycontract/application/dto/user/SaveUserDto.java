@@ -3,7 +3,6 @@ package com.beyond.bycontract.application.dto.user;
 public class SaveUserDto {
     private String firstName;
     private String lastName;
-    private String address;
     private String email;
     private String password;
 
@@ -13,7 +12,6 @@ public class SaveUserDto {
     public SaveUserDto(String firstName, String lastName, String address, String email, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.address = address;
         this.email = email;
         this.password = password;
     }
@@ -32,14 +30,6 @@ public class SaveUserDto {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public String getEmail() {
@@ -63,7 +53,6 @@ public class SaveUserDto {
         return "SaveUserDto{" +
                 "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", address='" + address + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';

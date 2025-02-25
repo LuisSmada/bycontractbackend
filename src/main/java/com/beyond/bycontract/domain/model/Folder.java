@@ -21,6 +21,15 @@ public class Folder {
         this.parentFolder = parentFolder;
     }
 
+    public Folder(String idFolder, String folderName, int size, User user, Folder parentFolder) {
+        this.idFolder = idFolder;
+        this.folderName = folderName;
+        this.size = size;
+        this.user = user;
+        this.parentFolder = parentFolder;
+    }
+
+
     public String getIdFolder() {
         return idFolder;
     }

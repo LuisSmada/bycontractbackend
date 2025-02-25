@@ -1,30 +1,19 @@
 package com.beyond.bycontract.application.dto.folder;
 
-public class SaveFolderDto {
+public class UpdateFolderDto {
 
-    private String idFolder;
     private String folderName;
     private int size;
-    private Long idUser;
     private String idParentFolder;
 
-    public SaveFolderDto() {}
+    public UpdateFolderDto() {}
 
-    public SaveFolderDto(String idFolder, String folderName, int size, Long idUser, String idParentFolder) {
-        this.idFolder = idFolder;
+    public UpdateFolderDto(String folderName, int size, String idParentFolder) {
         this.folderName = folderName;
         this.size = size;
-        this.idUser = idUser;
         this.idParentFolder = idParentFolder;
     }
 
-    public String getIdFolder() {
-        return idFolder;
-    }
-
-    public void setIdFolder(String idFolder) {
-        this.idFolder = idFolder;
-    }
 
     public String getFolderName() {
         return folderName;
@@ -42,14 +31,6 @@ public class SaveFolderDto {
         this.size = size;
     }
 
-    public Long getIdUser() {
-        return idUser;
-    }
-
-    public void setIdUser(Long idUser) {
-        this.idUser = idUser;
-    }
-
     public String getIdParentFolder() {
         return idParentFolder;
     }
@@ -60,11 +41,9 @@ public class SaveFolderDto {
 
     @Override
     public String toString() {
-        return "SaveFolderDto{" +
-                "idFolder='" + idFolder + '\'' +
-                ", fileName='" + folderName + '\'' +
+        return "UpdateFolderDto{" +
+                "folderName='" + folderName + '\'' +
                 ", size=" + size +
-                ", idUser='" + idUser + '\'' +
                 ", idParentFolder='" + idParentFolder + '\'' +
                 '}';
     }
