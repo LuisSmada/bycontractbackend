@@ -9,16 +9,18 @@ public class File {
     private String idFile;
     private String fileName;
     private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
     private int size;
     private User user;
     private Folder parentFolder;
 
     public File() {}
 
-    public File(String idFile, String fileName, LocalDateTime createdAt, int size, User user, Folder parentFolder) {
+    public File(String idFile, String fileName, LocalDateTime createdAt, LocalDateTime modifiedAt, int size, User user, Folder parentFolder) {
         this.idFile = idFile;
         this.fileName = fileName;
         this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
         this.size = size;
         this.user = user;
         this.parentFolder = parentFolder;
@@ -80,12 +82,21 @@ public class File {
         this.parentFolder = parentFolder;
     }
 
+    public LocalDateTime getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(LocalDateTime modifiedAt) {
+        this.modifiedAt = modifiedAt;
+    }
+
     @Override
     public String toString() {
         return "File{" +
-                "idFile=" + idFile +
+                "idFile='" + idFile + '\'' +
                 ", fileName='" + fileName + '\'' +
                 ", createdAt=" + createdAt +
+                ", modifiedAt=" + modifiedAt +
                 ", size=" + size +
                 ", user=" + user +
                 ", parentFolder=" + parentFolder +

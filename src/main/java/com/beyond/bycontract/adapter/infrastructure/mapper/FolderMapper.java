@@ -7,7 +7,7 @@ public class FolderMapper {
 
     public static Folder entityToDomain(FolderEntity folderEntity) {
         if (folderEntity == null) return null;
-        return new Folder(folderEntity.getIdFolder(), folderEntity.getFolderName(), folderEntity.getCreatedAt(), folderEntity.getSize(), UserMapper.entityToDomain(folderEntity.getUser()), entityToDomain(folderEntity.getParentFolder()));
+        return new Folder(folderEntity.getIdFolder(), folderEntity.getFolderName(), folderEntity.getCreatedAt(), folderEntity.getModifiedAt(), folderEntity.getSize(), UserMapper.entityToDomain(folderEntity.getUser()), entityToDomain(folderEntity.getParentFolder()));
     }
 
     public static FolderEntity domainToEntity(Folder folder) {
@@ -19,8 +19,10 @@ public class FolderMapper {
             folderEntity.setIdFolder(folder.getIdFolder());
         }
         folderEntity.setFolderName(folder.getFolderName());
-        folderEntity.setCreatedAt(folder.getCreatedAt());
         folderEntity.setSize(folder.getSize());
+
+        //createdAt and modifiedAt are not added because they are not updatable and not insertable through an entity,so it's useless to add it
+
         folderEntity.setUser(UserMapper.domainToEntity(folder.getUser()));
         folderEntity.setParentFolder(folder.getParentFolder() != null ? domainToEntity(folder.getParentFolder()) : null);
         return folderEntity;

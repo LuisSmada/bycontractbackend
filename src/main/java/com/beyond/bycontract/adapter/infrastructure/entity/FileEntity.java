@@ -18,6 +18,9 @@ public class FileEntity {
     @Column(name="created_at", updatable=false, insertable=false)
     private LocalDateTime createdAt;
 
+    @Column(name="modified_at", insertable=false)
+    private LocalDateTime modifiedAt;
+
     @Column(name="size")
     private int size;
 
@@ -28,6 +31,17 @@ public class FileEntity {
     @ManyToOne
     @JoinColumn(name = "id_parent_folder")
     private FolderEntity parentFolder;
+
+    @PrePersist
+    public void onPrePersist() {
+        this.createdAt = LocalDateTime.now(); //I added this because when modifiedAt is alone, its created before createdAt which is not normal
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+        this.modifiedAt = LocalDateTime.now();
+    }
 
     public FileEntity() {}
 
@@ -88,12 +102,21 @@ public class FileEntity {
         this.parentFolder = parentFolder;
     }
 
+    public LocalDateTime getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(LocalDateTime modifiedAt) {
+        this.modifiedAt = modifiedAt;
+    }
+
     @Override
     public String toString() {
         return "FileEntity{" +
-                "idFile=" + idFile +
+                "idFile='" + idFile + '\'' +
                 ", fileName='" + fileName + '\'' +
                 ", createdAt=" + createdAt +
+                ", modifiedAt=" + modifiedAt +
                 ", size=" + size +
                 ", user=" + user +
                 ", parentFolder=" + parentFolder +

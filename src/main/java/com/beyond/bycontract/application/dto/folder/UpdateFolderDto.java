@@ -1,5 +1,8 @@
 package com.beyond.bycontract.application.dto.folder;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 public class UpdateFolderDto {
 
     private String folderName;

@@ -1,5 +1,6 @@
 package com.beyond.bycontract.adapter.infrastructure.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -16,6 +17,9 @@ public class FolderEntity {
     @Column(name="created_at", updatable=false, insertable=false)
     private LocalDateTime createdAt;
 
+    @Column(name="modified_at", insertable=false)
+    private LocalDateTime modifiedAt;
+
     @Column(name="size")
     private int size;
 
@@ -26,6 +30,17 @@ public class FolderEntity {
     @ManyToOne
     @JoinColumn(name = "id_parent_folder")
     private FolderEntity parentFolder;
+
+    @PrePersist
+    public void onPrePersist() {
+        this.createdAt = LocalDateTime.now(); //I added this because when modifiedAt is alone, its created before createdAt which is not normal
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+        this.modifiedAt = LocalDateTime.now();
+    }
 
     public FolderEntity() {}
 
@@ -86,12 +101,21 @@ public class FolderEntity {
         this.parentFolder = parentFolder;
     }
 
+    public LocalDateTime getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(LocalDateTime modifiedAt) {
+        this.modifiedAt = modifiedAt;
+    }
+
     @Override
     public String toString() {
         return "FolderEntity{" +
                 "idFolder='" + idFolder + '\'' +
                 ", folderName='" + folderName + '\'' +
                 ", createdAt=" + createdAt +
+                ", modifiedAt=" + modifiedAt +
                 ", size=" + size +
                 ", user=" + user +
                 ", parentFolder=" + parentFolder +
