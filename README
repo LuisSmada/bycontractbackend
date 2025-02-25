@@ -1,0 +1,39 @@
+Requests to create table in bycontractbd
+
+****** CREATE FOLDER TABLE *****
+
+CREATE TABLE folder (
+	id_folder VARCHAR(255) PRIMARY KEY,
+	id_user INTEGER NOT NULL,
+	id_parent_folder VARCHAR(255),
+	folder_name VARCHAR(255) NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	size INTEGER,
+	CONSTRAINT fk_creator FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE,
+	CONSTRAINT fk_parent_folder FOREIGN KEY (id_parent_folder) REFERENCES folder(id_folder) ON DELETE CASCADE
+);
+
+
+****** CREATE FILE TABLE *****
+
+
+CREATE TABLE file (
+	id_file VARCHAR(255) PRIMARY KEY,
+	id_user INTEGER NOT NULL,
+	id_parent_folder VARCHAR(255),
+	file_name VARCHAR(255) NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	size INTEGER,
+	CONSTRAINT fk_creator FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE,
+	CONSTRAINT fk_parent_folder FOREIGN KEY (id_parent_folder) REFERENCES folder(id_folder) ON DELETE CASCADE
+);
+
+****** DELETE ALL DATA IN A TABLE  *****
+
+DELETE FROM file;
+
+****** DELETE ALL DATA IN A TABLE A RE-INITIALIZE THE ID *****
+
+TRUNCATE TABLE users RESTART IDENTITY CASCADE;

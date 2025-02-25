@@ -94,9 +94,9 @@ public class FileController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    @GetMapping("{idFile}")
-    public ResponseEntity<File> getFileById(@PathVariable String idFile) {
-        return fileService.getFileById(idFile).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    @GetMapping("{id}")
+    public ResponseEntity<File> getFileById(@PathVariable String id) {
+        return fileService.getFileById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
 
