@@ -5,7 +5,7 @@ import com.beyond.bycontract.domain.model.File;
 
 public class FileMapper {
     public static File entityToDomain(FileEntity fileEntity) {
-        return new File(fileEntity.getIdFile(), fileEntity.getFileName(), fileEntity.getCreatedAt(), fileEntity.getModifiedAt(), fileEntity.getSize(), UserMapper.entityToDomain(fileEntity.getUser()), FolderMapper.entityToDomain(fileEntity.getParentFolder()));
+        return new File(fileEntity.getIdFile(), fileEntity.getFileName(), fileEntity.getCreatedAt(), fileEntity.getModifiedAt(), fileEntity.getSize(), UserMapper.entityToDomain(fileEntity.getUser()), FolderMapper.entityToDomain(fileEntity.getParentFolder()), fileEntity.getFilePath());
     }
 
     public static FileEntity domainToEntity(File file) {
@@ -18,6 +18,7 @@ public class FileMapper {
 
         //createdAt and modifiedAt are not added because they are not updatable and not insertable through an entity,so it's useless to add it
 
+        fileEntity.setFilePath(file.getFilePath());
         fileEntity.setUser(UserMapper.domainToEntity(file.getUser()));
         fileEntity.setParentFolder(FolderMapper.domainToEntity(file.getParentFolder()));
         return fileEntity;

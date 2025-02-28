@@ -2,21 +2,45 @@ package com.beyond.bycontract.adapter.infrastructure.repository.file;
 
 import com.beyond.bycontract.adapter.infrastructure.entity.FileEntity;
 import com.beyond.bycontract.adapter.infrastructure.mapper.FileMapper;
+import com.beyond.bycontract.adapter.infrastructure.mapper.FolderMapper;
+import com.beyond.bycontract.adapter.infrastructure.repository.folder.SpringDataFolderRepository;
+import com.beyond.bycontract.adapter.infrastructure.repository.user.SpringDataUserRepository;
 import com.beyond.bycontract.domain.model.File;
+import com.beyond.bycontract.domain.model.Folder;
+import com.beyond.bycontract.domain.model.User;
 import com.beyond.bycontract.domain.repository.FileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Repository
 public class JpaFileRepository implements FileRepository {
 
+
+    private final SpringDataFileRepository springDataFileRepository;
+
     @Autowired
-    private SpringDataFileRepository springDataFileRepository;
+    public JpaFileRepository(SpringDataFileRepository springDataFileRepository) {
+        this.springDataFileRepository = springDataFileRepository;
+    }
+
 
     @Override
     public File createFile(File file) {
+        File fileFound = springDataFileRepository.findById(file.getIdFile()).map(FileMapper::entityToDomain).get();
+        if(fileFound != null) {
+            throw new RuntimeException("This file already exists");
+        }
+        FileEntity fileEntity = FileMapper.domainToEntity(file);
+        return FileMapper.entityToDomain(springDataFileRepository.save(fileEntity));
+    }
+
+    @Override
+    public File updloadFile(File file) throws IOException {
         FileEntity fileEntity = FileMapper.domainToEntity(file);
         return FileMapper.entityToDomain(springDataFileRepository.save(fileEntity));
     }
@@ -45,7 +69,7 @@ public class JpaFileRepository implements FileRepository {
             fileFound.setParentFolder(file.getParentFolder());
         }
 
-        if(file.getSize() != 0 && fileFound.getSize() != 0) {
+        if(file.getSize() != 0) {
             fileFound.setSize(file.getSize());
         }
 

@@ -32,6 +32,9 @@ public class FileEntity {
     @JoinColumn(name = "id_parent_folder")
     private FolderEntity parentFolder;
 
+    @Column(name="file_path")
+    private String filePath;
+
     @PrePersist
     public void onPrePersist() {
         this.createdAt = LocalDateTime.now(); //I added this because when modifiedAt is alone, its created before createdAt which is not normal
@@ -45,13 +48,15 @@ public class FileEntity {
 
     public FileEntity() {}
 
-    public FileEntity(String idFile, String fileName, LocalDateTime createdAt, int size, UserEntity user, FolderEntity parentFolder) {
+    public FileEntity(String idFile, String fileName, LocalDateTime createdAt, LocalDateTime modifiedAt, int size, UserEntity user, FolderEntity parentFolder, String filePath) {
         this.idFile = idFile;
         this.fileName = fileName;
         this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
         this.size = size;
         this.user = user;
         this.parentFolder = parentFolder;
+        this.filePath = filePath;
     }
 
     public String getIdFile() {
@@ -110,6 +115,14 @@ public class FileEntity {
         this.modifiedAt = modifiedAt;
     }
 
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
     @Override
     public String toString() {
         return "FileEntity{" +
@@ -120,6 +133,7 @@ public class FileEntity {
                 ", size=" + size +
                 ", user=" + user +
                 ", parentFolder=" + parentFolder +
+                ", filePath='" + filePath + '\'' +
                 '}';
     }
 }

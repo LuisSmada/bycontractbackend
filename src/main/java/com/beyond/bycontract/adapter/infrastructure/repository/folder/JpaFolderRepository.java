@@ -1,6 +1,7 @@
 package com.beyond.bycontract.adapter.infrastructure.repository.folder;
 
 import com.beyond.bycontract.adapter.infrastructure.entity.FolderEntity;
+import com.beyond.bycontract.adapter.infrastructure.exception.folder.FolderAlreadyExistsException;
 import com.beyond.bycontract.adapter.infrastructure.mapper.FolderMapper;
 import com.beyond.bycontract.domain.model.Folder;
 import com.beyond.bycontract.domain.repository.FolderRepository;

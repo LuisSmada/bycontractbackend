@@ -37,3 +37,12 @@ DELETE FROM file;
 ****** DELETE ALL DATA IN A TABLE A RE-INITIALIZE THE ID *****
 
 TRUNCATE TABLE users RESTART IDENTITY CASCADE;
+
+****** EXTRACT A DATABASE FROM POSTGRESQL *****
+
+pg_dump -U postgres(name of the owner) -b bycontractbd(database name) -f bycontractbd.sql(sql file name)
+
+
+****** GENERATE A RANDOW IDENTIFIER *****
+
+java.util.UUID.randomUUID().toString()

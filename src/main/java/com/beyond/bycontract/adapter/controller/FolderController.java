@@ -1,5 +1,7 @@
 package com.beyond.bycontract.adapter.controller;
 
+import com.beyond.bycontract.adapter.infrastructure.exception.folder.FolderNotFoundException;
+import com.beyond.bycontract.adapter.infrastructure.exception.user.UserNotFoundException;
 import com.beyond.bycontract.application.dto.folder.SaveFolderDto;
 import com.beyond.bycontract.application.dto.folder.UpdateFolderDto;
 import com.beyond.bycontract.application.service.FileService;
@@ -13,11 +15,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -53,10 +55,10 @@ public class FolderController {
             }
     )
     @PostMapping
-    public ResponseEntity<Folder> createFolder(@RequestBody SaveFolderDto saveFolderDto) {
+    public ResponseEntity<Folder> createFolder(@RequestBody SaveFolderDto saveFolderDto) throws IOException {
         Optional<User> userFound = userService.getUserById(saveFolderDto.getIdUser());
         if(userFound.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw new UserNotFoundException("User not found");
         }
         User user = userFound.get();
 
@@ -64,7 +66,7 @@ public class FolderController {
         if(saveFolderDto.getIdParentFolder() != null) {
             Optional<Folder> parentFolderFound = folderService.getFolderById(saveFolderDto.getIdParentFolder());
             if(parentFolderFound.isEmpty()) {
-                return ResponseEntity.badRequest().body(null);
+                throw new FolderNotFoundException("Parent folder not found");
             }
             parentFolder = parentFolderFound.get();
         }
@@ -92,7 +94,11 @@ public class FolderController {
     )
     @GetMapping("{id}")
     public ResponseEntity<Folder> getFolderById(@PathVariable String id) {
-        return folderService.getFolderById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        Optional<Folder> folderFound = folderService.getFolderById(id);
+        if(folderFound.isEmpty()) {
+            throw new FolderNotFoundException("Folder not found");
+        }
+        return ResponseEntity.ok(folderFound.get());
     }
 
 
@@ -107,7 +113,11 @@ public class FolderController {
     )
     @Parameter(name = "id", description = "ID of the folder to be deleted", required = true, example = "1")
     @DeleteMapping("{id}")
-    public void deleteFolderById(@PathVariable String id) {
+    public void deleteFolderById(@PathVariable String id) throws IOException {
+        Optional<Folder> folderFound = folderService.getFolderById(id);
+        if(folderFound.isEmpty()) {
+            throw new FolderNotFoundException("Folder not found");
+        }
         folderService.deleteFolderById(id);
     }
 
@@ -137,7 +147,7 @@ public class FolderController {
         Optional<Folder> folderFound = folderService.getFolderById(id);
 
         if (folderFound.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw new FolderNotFoundException("Folder not found");
         }
 
         Folder folder = folderFound.get();
@@ -147,7 +157,7 @@ public class FolderController {
         if(updateFolderDto.getIdParentFolder() != null) {
             Optional<Folder> parentFolderFound = folderService.getFolderById(updateFolderDto.getIdParentFolder());
             if(parentFolderFound.isEmpty()) {
-                return ResponseEntity.badRequest().body(null);
+                throw new FolderNotFoundException("Parent folder not found");
             }
             parentFolder = parentFolderFound.get();
         }

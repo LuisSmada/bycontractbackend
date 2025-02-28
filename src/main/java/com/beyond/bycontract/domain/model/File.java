@@ -13,10 +13,11 @@ public class File {
     private int size;
     private User user;
     private Folder parentFolder;
+    private String filePath;
 
     public File() {}
 
-    public File(String idFile, String fileName, LocalDateTime createdAt, LocalDateTime modifiedAt, int size, User user, Folder parentFolder) {
+    public File(String idFile, String fileName, LocalDateTime createdAt, LocalDateTime modifiedAt, int size, User user, Folder parentFolder, String filePath) {
         this.idFile = idFile;
         this.fileName = fileName;
         this.createdAt = createdAt;
@@ -24,6 +25,7 @@ public class File {
         this.size = size;
         this.user = user;
         this.parentFolder = parentFolder;
+        this.filePath = filePath;
     }
 
     public File(String idFile, String fileName, int size, User user, Folder parentFolder) {
@@ -90,6 +92,14 @@ public class File {
         this.modifiedAt = modifiedAt;
     }
 
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
     @Override
     public String toString() {
         return "File{" +
@@ -100,6 +110,7 @@ public class File {
                 ", size=" + size +
                 ", user=" + user +
                 ", parentFolder=" + parentFolder +
+                ", filePath='" + filePath + '\'' +
                 '}';
     }
 }

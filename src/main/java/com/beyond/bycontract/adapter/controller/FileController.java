@@ -17,9 +17,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -80,6 +83,38 @@ public class FileController {
 
 
     @Operation(
+            summary = "Upload a file",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "File object that needs to be added to the system",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = SaveFileDto.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "File created"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error"),
+            }
+    )
+    @PostMapping("/upload")
+    public ResponseEntity<File> uploadFile(
+            @RequestParam("idFile") String idFile,
+            @RequestParam("idUser") Long idUser,
+            @RequestParam(value = "idParentFolder", required = false) String idParentFolder,
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
+        try {
+            return ResponseEntity.ok(fileService.uploadFile(idFile, idUser, idParentFolder, file));
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+    @Operation(
             summary="Get a file by its id",
             responses = {
                     @ApiResponse(
@@ -95,7 +130,7 @@ public class FileController {
             }
     )
     @GetMapping("{id}")
-    public ResponseEntity<File> getFileById(@PathVariable String id) {
+    public ResponseEntity<File> getFileById(@PathVariable String id)  {
         return fileService.getFileById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
@@ -111,7 +146,7 @@ public class FileController {
     )
     @Parameter(name = "id", description = "IdD of the folder to be deleted", example = "1")
     @DeleteMapping("{id}")
-    public void deleteById(@PathVariable String id) {
+    public void deleteById(@PathVariable String id) throws IOException {
         fileService.deleteFileById(id);
     }
 

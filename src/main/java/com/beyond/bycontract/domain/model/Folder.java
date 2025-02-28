@@ -13,6 +13,7 @@ public class Folder {
     private User user;
     private Folder parentFolder;
 
+    public Folder() {}
     public Folder(String idFolder, String folderName, LocalDateTime createdAt, LocalDateTime modifiedAt, int size, User user, Folder parentFolder) {
         this.idFolder = idFolder;
         this.folderName = folderName;
