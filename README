@@ -46,3 +46,6 @@ pg_dump -U postgres(name of the owner) -b bycontractbd(database name) -f bycontr
 ****** GENERATE A RANDOW IDENTIFIER *****
 
 java.util.UUID.randomUUID().toString()
+
+****** RUN THE PROJECT IN THE TERMINAL *****
+./mwnw spring-boot:run
