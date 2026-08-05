@@ -3,7 +3,6 @@ package com.beyond.bycontract.shared.security;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,6 +14,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -22,95 +22,54 @@ import java.util.List;
 public class SecurityConfig {
 
 	private final AuthenticationProvider authenticationProvider;
-	private final JwtAuthentificationFilter jwtAuthentificationFilter;
-	private final String allowedOrigin;
+	@Value("${application.cors.allowed-origins}")
+	private String allowedOrigins;
+	private JwtAuthentificationFilter jwtAuthentificationFilter;
 
-	public SecurityConfig(
-			AuthenticationProvider authenticationProvider,
-			JwtAuthentificationFilter jwtAuthentificationFilter,
-			@Value("${application.cors.allowed-origins}") String allowedOrigin
-	) {
+	public SecurityConfig(AuthenticationProvider authenticationProvider, JwtAuthentificationFilter jwtAuthentificationFilter) {
 		this.authenticationProvider = authenticationProvider;
 		this.jwtAuthentificationFilter = jwtAuthentificationFilter;
-		this.allowedOrigin = allowedOrigin;
 	}
 
+	//Configuration of the routes and the filter
 	@Bean
-	public SecurityFilterChain securityFilterChain(
-			HttpSecurity http,
-			CorsConfigurationSource corsConfigurationSource
-	) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
 
 		http
-				.cors(cors ->
-						cors.configurationSource(corsConfigurationSource)
-				)
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.requestMatchers("/api/v1/auth/**").permitAll()
-						.requestMatchers(
-								"/swagger-ui/**",
-								"/v3/api-docs/**"
-						).permitAll()
-						.anyRequest().authenticated()
+						.requestMatchers("/api/v1/auth/**").permitAll() //Public routes (login, register)
+						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+						.anyRequest().authenticated() //any other requests need a token
 				)
-				.sessionManagement(session ->
-						session.sessionCreationPolicy(
-								SessionCreationPolicy.STATELESS
-						)
+				.sessionManagement(session -> session
+						.sessionCreationPolicy(SessionCreationPolicy.STATELESS) //API save anything in memory
 				)
 				.authenticationProvider(authenticationProvider)
-				.addFilterBefore(
-						jwtAuthentificationFilter,
-						UsernamePasswordAuthenticationFilter.class
-				);
+				//Place the jwtFilter before Spring filter
+				.addFilterBefore(jwtAuthentificationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
+		CorsConfiguration corsConfiguration = new CorsConfiguration();
+		corsConfiguration.setAllowedOrigins(List.of(allowedOrigins));
 
-		configuration.setAllowedOrigins(
-				List.of(allowedOrigin)
-		);
+		// "OPTIONS" est crucial : le navigateur fait toujours une requête vide OPTIONS avant une vraie requête pour vérifier les droits
+		corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		// Autoriser Next.js à nous envoyer le JWT via l'en-tête "Authorization" et du JSON via "Content-Type"
+		corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
-		configuration.setAllowedMethods(
-				List.of(
-						"GET",
-						"POST",
-						"PUT",
-						"PATCH",
-						"DELETE",
-						"OPTIONS"
-				)
-		);
+		//Authorize the cookie transport because by defautl navigators don't accept to attach cookie on requests from two differents ports
+		corsConfiguration.setAllowCredentials(true);
 
-		configuration.setAllowedHeaders(
-				List.of(
-						"Authorization",
-						"Content-Type",
-						"Accept",
-						"Origin",
-						"X-Requested-With",
-						"X-XSRF-TOKEN"
-				)
-		);
-
-		configuration.setAllowCredentials(true);
-
-		configuration.setMaxAge(3600L);
-
-		UrlBasedCorsConfigurationSource source =
-				new UrlBasedCorsConfigurationSource();
-
-		source.registerCorsConfiguration(
-				"/**",
-				configuration
-		);
-
+		//Apply all the rules at all the routes of the API
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", corsConfiguration);
 		return source;
 	}
+
 }
