@@ -1,0 +1,27 @@
+name: BYCONTRACT BACKEND
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git checkout ${{github.ref_name}}
+        uses: actions/checkout@v6
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "21"
+          cache: "maven"
+
+      # Optionnel mais sécurisant : on s'assure que le wrapper a les droits d'exécution
+      - name: Make Maven wrapper executable
+        run: chmod +x ./mvnw
+
+      #- name: Build and run tests
+      #  run: ./mvnw clean verify
