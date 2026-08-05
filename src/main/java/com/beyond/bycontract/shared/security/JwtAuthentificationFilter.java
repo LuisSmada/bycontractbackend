@@ -2,9 +2,11 @@ package com.beyond.bycontract.shared.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,58 +18,105 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-public class JwtAuthentificationFilter extends OncePerRequestFilter {
+public class JwtAuthentificationFilter
+		extends OncePerRequestFilter {
+
 	private final JwtService jwtService;
 	private final UserDetailsService userDetailsService;
 
-	public JwtAuthentificationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+	public JwtAuthentificationFilter(
+			JwtService jwtService,
+			UserDetailsService userDetailsService
+	) {
 		this.jwtService = jwtService;
 		this.userDetailsService = userDetailsService;
 	}
 
+	@Override
+	protected boolean shouldNotFilter(
+			@NonNull HttpServletRequest request
+	) {
+		return HttpMethod.OPTIONS.matches(
+				request.getMethod()
+		);
+	}
+
+	@Override
 	protected void doFilterInternal(
 			@NonNull HttpServletRequest request,
 			@NonNull HttpServletResponse response,
 			@NonNull FilterChain filterChain
 	) throws ServletException, IOException {
 
-		String jwt = null;
-		String userEmail = null;
+		String jwt = extractJwtFromCookies(request);
 
-		if (request.getCookies() != null) {
-			for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
-				if ("jwt".equals(cookie.getName())) {
-					jwt = cookie.getValue();
-					break;
-				}
-			}
-		}
-
-		// Si aucun cookie n'a été trouvé, on laisse passer (sera bloqué plus tard si route protégée)
 		if (jwt == null) {
 			filterChain.doFilter(request, response);
 			return;
 		}
 
-		//Extract the email from the token
-		userEmail = jwtService.extractUsername(jwt);
+		String userEmail;
 
-		//If the email exists and the users is not already connected in this context
-		if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+		try {
+			userEmail = jwtService.extractUsername(jwt);
+		} catch (Exception exception) {
+			/*
+			 * Le cookie est invalide ou expiré.
+			 * On laisse Spring Security refuser ensuite
+			 * l'accès si la route est protégée.
+			 */
+			filterChain.doFilter(request, response);
+			return;
+		}
 
-			//Find the user in the database by his email
-			UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+		if (
+				userEmail != null
+						&& SecurityContextHolder
+						.getContext()
+						.getAuthentication() == null
+		) {
+			UserDetails userDetails =
+					userDetailsService.loadUserByUsername(
+							userEmail
+					);
 
-			//if is token is valid, say to spring that the user is authenticated
 			if (jwtService.isTokenValid(jwt, userDetails)) {
-				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				SecurityContextHolder.getContext().setAuthentication(authToken);
+				UsernamePasswordAuthenticationToken authentication =
+						new UsernamePasswordAuthenticationToken(
+								userDetails,
+								null,
+								userDetails.getAuthorities()
+						);
+
+				authentication.setDetails(
+						new WebAuthenticationDetailsSource()
+								.buildDetails(request)
+				);
+
+				SecurityContextHolder
+						.getContext()
+						.setAuthentication(authentication);
 			}
 		}
 
-		//Give the next to the controller or the next filter (like a middleware)
 		filterChain.doFilter(request, response);
+	}
 
+	private String extractJwtFromCookies(
+			HttpServletRequest request
+	) {
+		Cookie[] cookies = request.getCookies();
+
+		if (cookies == null) {
+			return null;
+		}
+
+		for (Cookie cookie : cookies) {
+			if ("jwt".equals(cookie.getName())) {
+				return cookie.getValue();
+			}
+		}
+
+		return null;
 	}
 }
