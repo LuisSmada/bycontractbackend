@@ -19,12 +19,20 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-	private final AuthService authService;
-	@Value("${application.cookie.secure}")
-	private boolean cookieSecure;
+	private static final long COOKIE_MAX_AGE_SECONDS = 24 * 60 * 60;
 
-	public AuthController(AuthService authService) {
+	private final AuthService authService;
+	private final boolean cookieSecure;
+	private final String cookieSameSite;
+
+	public AuthController(
+			AuthService authService,
+			@Value("${application.cookie.secure}") boolean cookieSecure,
+			@Value("${application.cookie.same-site}") String cookieSameSite
+	) {
 		this.authService = authService;
+		this.cookieSecure = cookieSecure;
+		this.cookieSameSite = cookieSameSite;
 	}
 
 	@PostMapping("/register")
@@ -45,7 +53,7 @@ public class AuthController {
 				.secure(cookieSecure) //To put a true in production for the HTTPS
 				.path("/") //Send the cookies on all the routes
 				.maxAge(24 * 60 * 60) //Life 1 day
-				.sameSite("Strict") //Protection CSRF
+				.sameSite(cookieSameSite) //Protection CSRF
 				.build();
 
 		return ResponseEntity.ok()
@@ -72,5 +80,21 @@ public class AuthController {
 				"lastName", currentUser.getLastName(),
 				"role", currentUser.getUserRole()
 		));
+	}
+
+
+	@PostMapping("/logout")
+	public ResponseEntity<?> logout() {
+		ResponseCookie deletedCookie = ResponseCookie.from("jwt", "")
+				.httpOnly(true)
+				.secure(cookieSecure)
+				.path("/")
+				.maxAge(0)
+				.sameSite(cookieSameSite)
+				.build();
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.SET_COOKIE, deletedCookie.toString())
+				.body(Map.of("message", "Logout successfully"));
 	}
 }
