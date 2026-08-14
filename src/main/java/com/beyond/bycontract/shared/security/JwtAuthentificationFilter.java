@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -31,7 +32,9 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
 	protected boolean shouldNotFilter(
 			@NonNull HttpServletRequest request
 	) {
-		return HttpMethod.OPTIONS.matches(request.getMethod());
+		String path = request.getServletPath();
+		return HttpMethod.OPTIONS.matches(request.getMethod()) || "/api/v1/auth/login".equals(path)
+				|| "/api/v1/auth/register".equals(path);
 	}
 
 	protected void doFilterInternal(
@@ -41,7 +44,6 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
 	) throws ServletException, IOException {
 
 		String jwt = null;
-		String userEmail = null;
 
 		if (request.getCookies() != null) {
 			for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
@@ -58,22 +60,25 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		//Extract the email from the token
-		userEmail = jwtService.extractUsername(jwt);
-
 		//If the email exists and the users is not already connected in this context
-		if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+		try {
+			//Extract the email from the token
+			String userEmail = jwtService.extractUsername(jwt);
 
-			//Find the user in the database by his email
-			UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+			if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+				//Find the user in the database by his email
+				UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-			//if is token is valid, say to spring that the user is authenticated
-			if (jwtService.isTokenValid(jwt, userDetails)) {
-				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				SecurityContextHolder.getContext().setAuthentication(authToken);
+				//if is token is valid, say to spring that the user is authenticated
+				if (jwtService.isTokenValid(jwt, userDetails)) {
+					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+					SecurityContextHolder.getContext().setAuthentication(authToken);
+				}
 			}
+		} catch (UsernameNotFoundException ignored) {
 		}
+
 
 		//Give the next to the controller or the next filter (like a middleware)
 		filterChain.doFilter(request, response);

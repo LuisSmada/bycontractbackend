@@ -34,6 +34,12 @@ public class CompanyController {
 		return service.getAllCompanies();
 	}
 
+	@GetMapping("{id}")
+	@ResponseStatus(HttpStatus.OK)
+	public CompanyResponse getCompanyById(@PathVariable UUID id) {
+		return service.getCompanyById(id);
+	}
+
 	@DeleteMapping("{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteById(@PathVariable UUID id) {

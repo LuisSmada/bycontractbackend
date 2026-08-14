@@ -2,6 +2,7 @@ package com.beyond.bycontract.company.domain.repository;
 
 import com.beyond.bycontract.company.domain.model.Company;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,4 +18,8 @@ public interface CompanyRepository {
 	boolean existsBySiret(String siret);
 
 	void deleteById(UUID id);
+
+	Optional<Company> getCompanyById(UUID id);
+
+	List<Company> getCompaniesByIds(Collection<UUID> ids);
 }

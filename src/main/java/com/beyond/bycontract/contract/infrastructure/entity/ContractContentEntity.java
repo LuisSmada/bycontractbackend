@@ -1,7 +1,10 @@
 package com.beyond.bycontract.contract.infrastructure.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,8 +21,9 @@ public class ContractContentEntity {
 	@JoinColumn(name = "id_contract")
 	private ContractEntity contract;
 
-	@Column(name = "body", columnDefinition = "jsonb")
-	private String body;
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(nullable = false)
+	private JsonNode body;
 
 	@Column(name = "plain_text", columnDefinition = "TEXT")
 	private String plainText;
@@ -37,7 +41,7 @@ public class ContractContentEntity {
 	public ContractContentEntity() {
 	}
 
-	public ContractContentEntity(UUID id, ContractEntity contract, String body, String plainText, String signedPdfUrl, Integer version, LocalDateTime modifiedAt) {
+	public ContractContentEntity(UUID id, ContractEntity contract, JsonNode body, String plainText, String signedPdfUrl, Integer version, LocalDateTime modifiedAt) {
 		this.id = id;
 		this.contract = contract;
 		this.body = body;
@@ -79,11 +83,11 @@ public class ContractContentEntity {
 		this.plainText = plainText;
 	}
 
-	public String getBody() {
+	public JsonNode getBody() {
 		return body;
 	}
 
-	public void setBody(String body) {
+	public void setBody(JsonNode body) {
 		this.body = body;
 	}
 

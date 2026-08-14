@@ -1,5 +1,7 @@
 package com.beyond.bycontract.contract.domain.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,14 +21,14 @@ public class Contract {
 	private Boolean autoRenew;
 	//Montant du contract
 	private BigDecimal value;
-	private UUID idContractContent;
+	private ContractContent contractContent;
 	private LocalDateTime createdAt;
 	private LocalDateTime modifiedAt;
 
 	public Contract() {
 	}
 
-	public Contract(String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, UUID idContractContent, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+	public Contract(String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, ContractContent contractContent, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 		this.name = name;
 		this.contractType = contractType;
 		this.contractStatus = contractStatus;
@@ -37,12 +39,33 @@ public class Contract {
 		this.expirationDate = expirationDate;
 		this.autoRenew = autoRenew;
 		this.value = value;
-		this.idContractContent = idContractContent;
+		this.contractContent = contractContent;
 		this.createdAt = createdAt;
 		this.modifiedAt = modifiedAt;
 	}
 
-	public static Contract create(String name, ContractType contractType, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value) {
+	public Contract(UUID id, String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, ContractContent contractContent, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+		this.id = id;
+		this.name = name;
+		this.contractType = contractType;
+		this.contractStatus = contractStatus;
+		this.idCompany = idCompany;
+		this.idAuthor = idAuthor;
+		this.idTemplate = idTemplate;
+		this.effectiveDate = effectiveDate;
+		this.expirationDate = expirationDate;
+		this.autoRenew = autoRenew;
+		this.value = value;
+		this.contractContent = contractContent;
+		this.createdAt = createdAt;
+		this.modifiedAt = modifiedAt;
+	}
+
+	public static Contract create(String name, ContractType contractType, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, JsonNode body, String plainText) {
+		ContractContent newContent = null;
+		if (body != null) {
+			newContent = new ContractContent(body, plainText, null, LocalDateTime.now());
+		}
 		return new Contract(
 				name,
 				contractType,
@@ -54,7 +77,7 @@ public class Contract {
 				expirationDate,
 				autoRenew,
 				value,
-				null,
+				newContent,
 				LocalDateTime.now(),
 				LocalDateTime.now()
 		);
@@ -105,8 +128,8 @@ public class Contract {
 		return value;
 	}
 
-	public UUID getIdContractContent() {
-		return idContractContent;
+	public ContractContent getContractContent() {
+		return contractContent;
 	}
 
 	public LocalDateTime getCreatedAt() {
@@ -131,7 +154,7 @@ public class Contract {
 				", expirationDate=" + expirationDate +
 				", autoRenew=" + autoRenew +
 				", value=" + value +
-				", idContractContent=" + idContractContent +
+				", idContractContent=" + contractContent.getId() +
 				", createdAt=" + createdAt +
 				", modifiedAt=" + modifiedAt +
 				'}';

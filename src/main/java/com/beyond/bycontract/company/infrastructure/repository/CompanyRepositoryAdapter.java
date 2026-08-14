@@ -7,6 +7,7 @@ import com.beyond.bycontract.company.infrastructure.mapper.CompanyPersistenceMap
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,5 +42,15 @@ public class CompanyRepositoryAdapter implements CompanyRepository {
 	@Override
 	public void deleteById(UUID id) {
 		jpaRepository.deleteById(id);
+	}
+
+	@Override
+	public Optional<Company> getCompanyById(UUID id) {
+		return jpaRepository.findById(id).map(CompanyPersistenceMapper::reconstituteDomain);
+	}
+
+	@Override
+	public List<Company> getCompaniesByIds(Collection<UUID> ids) {
+		return jpaRepository.findAllById(ids).stream().map(CompanyPersistenceMapper::reconstituteDomain).toList();
 	}
 }

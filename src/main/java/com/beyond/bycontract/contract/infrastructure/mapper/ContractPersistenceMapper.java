@@ -2,38 +2,62 @@ package com.beyond.bycontract.contract.infrastructure.mapper;
 
 import com.beyond.bycontract.company.infrastructure.entity.CompanyEntity;
 import com.beyond.bycontract.contract.domain.model.Contract;
-import com.beyond.bycontract.contract.domain.model.ContractStatus;
-import com.beyond.bycontract.contract.domain.model.ContractType;
+import com.beyond.bycontract.contract.domain.model.ContractContent;
 import com.beyond.bycontract.contract.infrastructure.entity.ContractContentEntity;
 import com.beyond.bycontract.contract.infrastructure.entity.ContractEntity;
 import com.beyond.bycontract.template.infrastructure.entity.TemplateEntity;
 import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 public class ContractPersistenceMapper {
 
 	public static Contract reconstituteDomain(ContractEntity entity) {
 		try {
-			java.lang.reflect.Constructor<Contract> constructor = Contract.class.getDeclaredConstructor(
-					UUID.class, String.class, ContractType.class, ContractStatus.class, UUID.class, UUID.class, UUID.class, LocalDate.class, LocalDate.class, Boolean.class, BigDecimal.class, UUID.class, LocalDateTime.class, LocalDateTime.class
+
+			ContractContent contractContent = new ContractContent(
+					entity.getContent().getBody(),
+					entity.getContent().getPlainText(),
+					entity.getContent().getSignedPdfUrl(),
+					entity.getContent().getModifiedAt()
 			);
-			constructor.setAccessible(true);
-			return constructor.newInstance(
-					entity.getId(), entity.getName(), entity.getContractType(), entity.getContractStatus(),
+
+			return new Contract(
+					entity.getId(),
+					entity.getName(),
+					entity.getContractType(),
+					entity.getContractStatus(),
 					entity.getCompany() != null ? entity.getCompany().getId() : null,
 					entity.getAuthor() != null ? entity.getAuthor().getId() : null,
 					entity.getTemplate() != null ? entity.getTemplate().getId() : null,
-					entity.getEffectiveDate(), entity.getExpirationDate(), entity.getAutoRenew(), entity.getValue(),
-					entity.getContent() != null ? entity.getContent().getId() : null,
-					entity.getCreatedAt(), entity.getModifiedAt()
+					entity.getEffectiveDate(),
+					entity.getExpirationDate(),
+					entity.getAutoRenew(),
+					entity.getValue(),
+					contractContent,
+					entity.getCreatedAt(),
+					entity.getModifiedAt()
 			);
 		} catch (Exception e) {
 			throw new RuntimeException("Erreur de mapping BDD -> Domaine", e);
 		}
+
+
+		//try {
+		//	java.lang.reflect.Constructor<Contract> constructor = Contract.class.getDeclaredConstructor(
+		//			UUID.class, String.class, ContractType.class, ContractStatus.class, UUID.class, UUID.class, UUID.class, LocalDate.class, LocalDate.class, Boolean.class, BigDecimal.class, UUID.class, LocalDateTime.class, LocalDateTime.class
+		//	);
+		//	constructor.setAccessible(true);
+		//	return constructor.newInstance(
+		//			entity.getId(), entity.getName(), entity.getContractType(), entity.getContractStatus(),
+		//			entity.getCompany() != null ? entity.getCompany().getId() : null,
+		//			entity.getAuthor() != null ? entity.getAuthor().getId() : null,
+		//			entity.getTemplate() != null ? entity.getTemplate().getId() : null,
+		//			entity.getEffectiveDate(), entity.getExpirationDate(), entity.getAutoRenew(), entity.getValue(),
+		//			entity.getContent() != null ? entity.getContent().getId() : null,
+		//			entity.getCreatedAt(), entity.getModifiedAt()
+		//	);
+		//} catch (Exception e) {
+		//	throw new RuntimeException("Erreur de mapping BDD -> Domaine", e);
+		//}
 	}
 
 
@@ -73,10 +97,11 @@ public class ContractPersistenceMapper {
 			contractEntity.setTemplate(templateEntity);
 		}
 
-		if (contract.getIdContractContent() != null) {
+		if (contract.getContractContent() != null) {
 			ContractContentEntity contractContentEntity = new ContractContentEntity();
-			contractContentEntity.setId(contract.getIdContractContent());
-
+			contractContentEntity.setBody(contract.getContractContent().getBody());
+			contractContentEntity.setPlainText(contract.getContractContent().getPlainText());
+			contractContentEntity.setContract(contractEntity);
 			contractEntity.setContent(contractContentEntity);
 		}
 

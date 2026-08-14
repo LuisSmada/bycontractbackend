@@ -7,6 +7,10 @@ import com.beyond.bycontract.contract.infrastructure.mapper.ContractPersistenceM
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 @Repository
 @RequiredArgsConstructor
 public class ContractRepositoryAdapter implements ContractRepository {
@@ -18,4 +22,17 @@ public class ContractRepositoryAdapter implements ContractRepository {
 		ContractEntity savedEntity = jpaRepository.save(ContractPersistenceMapper.toEntity(contract));
 		return ContractPersistenceMapper.reconstituteDomain(savedEntity);
 	}
+
+	@Override
+	public List<Contract> getAllContracts() {
+		List<ContractEntity> contractEntities = jpaRepository.findAll();
+		return contractEntities.stream().map(ContractPersistenceMapper::reconstituteDomain).toList();
+	}
+
+	@Override
+	public Optional<Contract> getContractById(UUID id) {
+		return jpaRepository.findById(id).map(ContractPersistenceMapper::reconstituteDomain);
+	}
+
+
 }

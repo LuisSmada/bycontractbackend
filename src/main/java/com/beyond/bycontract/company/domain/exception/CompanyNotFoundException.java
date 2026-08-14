@@ -1,5 +1,7 @@
 package com.beyond.bycontract.company.domain.exception;
 
+import java.util.UUID;
+
 public class CompanyNotFoundException extends RuntimeException {
 
 	public CompanyNotFoundException(String message) {
@@ -12,5 +14,9 @@ public class CompanyNotFoundException extends RuntimeException {
 
 	public CompanyNotFoundException(Throwable cause) {
 		super(cause);
+	}
+
+	public CompanyNotFoundException(UUID id) {
+		super("Template with id " + id + " not found");
 	}
 }

@@ -2,6 +2,7 @@ package com.beyond.bycontract.contract.presentation.dto;
 
 import com.beyond.bycontract.contract.application.dto.CreateContractCommand;
 import com.beyond.bycontract.contract.domain.model.ContractType;
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -14,7 +15,8 @@ public record CreateContractRequest(
 		@NotNull UUID idAuthor,
 		@NotNull UUID idCompany,
 		UUID idTemplate,
-		UUID idContractContent,
+		@NotNull String bodyText,
+		@NotNull JsonNode bodyJson,
 		@NotNull LocalDate effectiveDate,
 		LocalDate expirationDate,
 		@NotNull ContractType contractType,
@@ -30,6 +32,8 @@ public record CreateContractRequest(
 				this.idAuthor(),
 				this.idCompany(),
 				this.idTemplate(),
+				this.bodyText,
+				this.bodyJson,
 				this.effectiveDate(),
 				this.expirationDate(),
 				this.contractType(),

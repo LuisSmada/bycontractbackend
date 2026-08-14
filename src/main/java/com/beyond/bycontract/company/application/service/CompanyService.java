@@ -2,6 +2,7 @@ package com.beyond.bycontract.company.application.service;
 
 import com.beyond.bycontract.company.application.dto.CompanyResponse;
 import com.beyond.bycontract.company.application.dto.CreateCompanyCommand;
+import com.beyond.bycontract.company.domain.exception.CompanyNotFoundException;
 import com.beyond.bycontract.company.domain.exception.SiretAlreadyExistsException;
 import com.beyond.bycontract.company.domain.model.Company;
 import com.beyond.bycontract.company.domain.repository.CompanyRepository;
@@ -54,6 +55,16 @@ public class CompanyService {
 
 	public void deleteById(UUID id) {
 		repository.deleteById(id);
+	}
+
+	public CompanyResponse getCompanyById(UUID id) {
+		Company company = repository.getCompanyById(id).orElseThrow(() -> new CompanyNotFoundException("No company found with id: " + id));
+		return new CompanyResponse(
+				company.getId(),
+				company.getName(),
+				company.getSiret(),
+				company.getAddress()
+		);
 	}
 
 }
