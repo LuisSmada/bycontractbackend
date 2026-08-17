@@ -42,6 +42,8 @@ TRUNCATE TABLE users RESTART IDENTITY CASCADE;
 
 pg_dump -U postgres(name of the owner) -b bycontractbd(database name) -f bycontractbd.sql(sql file name)
 
+****** FOR THE TESTS *****
+In pgAdmin, create a new database called bycontractbd_test
 
 ****** GENERATE A RANDOW IDENTIFIER *****
 
