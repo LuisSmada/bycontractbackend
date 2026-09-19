@@ -6,9 +6,9 @@ import com.beyond.bycontract.company.domain.exception.CompanyNotFoundException;
 import com.beyond.bycontract.company.domain.exception.SiretAlreadyExistsException;
 import com.beyond.bycontract.company.domain.model.Company;
 import com.beyond.bycontract.company.domain.repository.CompanyRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +28,7 @@ public class CompanyService {
 
 		Company company = Company.create(
 				command.name(),
+				command.idCreator(),
 				command.siret(),
 				command.address()
 		);
@@ -43,6 +44,7 @@ public class CompanyService {
 
 	}
 
+	@Transactional(readOnly = true)
 	public List<CompanyResponse> getAllCompanies() {
 		List<Company> allCompanies = repository.getAllCompanies();
 		return allCompanies.stream().map(company -> new CompanyResponse(
@@ -57,6 +59,7 @@ public class CompanyService {
 		repository.deleteById(id);
 	}
 
+	@Transactional(readOnly = true)
 	public CompanyResponse getCompanyById(UUID id) {
 		Company company = repository.getCompanyById(id).orElseThrow(() -> new CompanyNotFoundException("No company found with id: " + id));
 		return new CompanyResponse(
@@ -65,6 +68,16 @@ public class CompanyService {
 				company.getSiret(),
 				company.getAddress()
 		);
+	}
+
+	public List<CompanyResponse> getAllCompaniesByIdCreator(UUID idCreator) {
+		List<Company> allCompanies = repository.getCompaniesByIdCreator(idCreator);
+		return allCompanies.stream().map(company -> new CompanyResponse(
+				company.getId(),
+				company.getName(),
+				company.getSiret(),
+				company.getAddress()
+		)).toList();
 	}
 
 }

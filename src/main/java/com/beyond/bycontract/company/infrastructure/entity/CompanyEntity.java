@@ -1,5 +1,6 @@
 package com.beyond.bycontract.company.infrastructure.entity;
 
+import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -15,6 +16,10 @@ public class CompanyEntity {
 	@Column(name = "id")
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "id_creator", nullable = false)
+	private UserEntity creator;
 
 	@Column(name = "name")
 	private String name;
@@ -37,8 +42,9 @@ public class CompanyEntity {
 	public CompanyEntity() {
 	}
 
-	public CompanyEntity(UUID id, String name, String siret, String address, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+	public CompanyEntity(UUID id, UserEntity creator, String name, String siret, String address, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 		this.id = id;
+		this.creator = creator;
 		this.name = name;
 		this.siret = siret;
 		this.address = address;
@@ -52,6 +58,14 @@ public class CompanyEntity {
 
 	public void setId(UUID id) {
 		this.id = id;
+	}
+
+	public UserEntity getCreator() {
+		return creator;
+	}
+
+	public void setCreator(UserEntity creator) {
+		this.creator = creator;
 	}
 
 	public String getName() {

@@ -9,13 +9,14 @@ public class User {
 	private String lastName;
 	private String email;
 	private String password;
+	private UserRole role;
 	private LocalDateTime createdAt;
 	private LocalDateTime modifiedAt;
 
 	public User() {
 	}
 
-	//Constructor for the controller
+	//CONSTRUCTOR FOR THE CREATION IN THE CONTROLLER
 	public User(String firstName, String lastName, String email, String password) {
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -23,12 +24,13 @@ public class User {
 		this.password = password;
 	}
 
-	public User(UUID id, String firstName, String lastName, String email, String password, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+	public User(UUID id, String firstName, String lastName, String email, String password, UserRole role, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
 		this.password = password;
+		this.role = role;
 		this.createdAt = createdAt;
 		this.modifiedAt = modifiedAt;
 	}
@@ -87,6 +89,14 @@ public class User {
 
 	public void setModifiedAt(LocalDateTime modifiedAt) {
 		this.modifiedAt = modifiedAt;
+	}
+
+	public UserRole getRole() {
+		return role;
+	}
+
+	public void setRole(UserRole role) {
+		this.role = role;
 	}
 
 	@Override

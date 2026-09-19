@@ -10,7 +10,7 @@ public class UserPersistenceMapper {
 
 
 	public static User entityToDomain(UserEntity userEntity) {
-		return new User(userEntity.getId(), userEntity.getFirstName(), userEntity.getLastName(), userEntity.getEmail(), userEntity.getPassword(), userEntity.getCreatedAt(), userEntity.getModifiedAt());
+		return new User(userEntity.getId(), userEntity.getFirstName(), userEntity.getLastName(), userEntity.getEmail(), userEntity.getPassword(), userEntity.getUserRole(), userEntity.getCreatedAt(), userEntity.getModifiedAt());
 	}
 
 	public static UserEntity domainToEntity(User user) {
@@ -25,6 +25,7 @@ public class UserPersistenceMapper {
 		userEntity.setLastName(user.getLastName());
 		userEntity.setEmail(user.getEmail());
 		userEntity.setPassword(user.getPassword());
+		userEntity.setUserRole(user.getRole());
 
 		return userEntity;
 	}

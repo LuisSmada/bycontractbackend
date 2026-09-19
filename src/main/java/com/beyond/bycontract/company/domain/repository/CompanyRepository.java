@@ -22,4 +22,8 @@ public interface CompanyRepository {
 	Optional<Company> getCompanyById(UUID id);
 
 	List<Company> getCompaniesByIds(Collection<UUID> ids);
+
+	List<Company> getCompaniesByIdCreator(UUID userId);
+
+//	Company updateCompanyById(Company company);
 }

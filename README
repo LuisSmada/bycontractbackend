@@ -51,3 +51,9 @@ java.util.UUID.randomUUID().toString()
 
 ****** RUN THE PROJECT IN THE TERMINAL *****
 ./mwnw spring-boot:run
+
+
+***********************************
+ApplicationConfig, c'est le bureau de la sécurité à l'entrée du bâtiment. Il définit les règles : qui est le vigile, quel type de scanner de badge utiliser (le PasswordEncoder), et comment vérifier la liste des employés. Il n'y a qu'un seul bureau de sécurité pour tout le bâtiment.
+
+CustomUserDetails, c'est le badge nominatif que l'on donne à un employé (ex: Adams) quand il rentre. Ce badge contient son nom, son ID, et ses droits d'accès (rôles). Il y a autant de badges que d'employés connectés.

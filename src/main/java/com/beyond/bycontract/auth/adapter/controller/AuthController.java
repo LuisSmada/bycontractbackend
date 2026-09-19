@@ -4,6 +4,7 @@ import com.beyond.bycontract.auth.application.dto.AuthResponseDto;
 import com.beyond.bycontract.auth.application.dto.LoginRequestDto;
 import com.beyond.bycontract.auth.application.dto.RegisterRequestDto;
 import com.beyond.bycontract.auth.application.service.AuthService;
+import com.beyond.bycontract.shared.utils.CustomUserDetails;
 import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -71,14 +72,14 @@ public class AuthController {
 			return ResponseEntity.status(401).body(Map.of("error", "Non authenticated"));
 		}
 
-		UserEntity currentUser = (UserEntity) authentication.getPrincipal();
+		CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
 
 		return ResponseEntity.ok(Map.of(
 				"id", currentUser.getId(),
-				"email", currentUser.getEmail(),
+				"email", currentUser.getUsername(),
 				"firstName", currentUser.getFirstName(),
 				"lastName", currentUser.getLastName(),
-				"role", currentUser.getUserRole()
+				"role", currentUser.getAuthorities().iterator().next().getAuthority()
 		));
 	}
 

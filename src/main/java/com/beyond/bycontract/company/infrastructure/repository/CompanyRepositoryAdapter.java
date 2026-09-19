@@ -53,4 +53,9 @@ public class CompanyRepositoryAdapter implements CompanyRepository {
 	public List<Company> getCompaniesByIds(Collection<UUID> ids) {
 		return jpaRepository.findAllById(ids).stream().map(CompanyPersistenceMapper::reconstituteDomain).toList();
 	}
+
+	@Override
+	public List<Company> getCompaniesByIdCreator(UUID idCreator) {
+		return jpaRepository.findAllByIdCreator(idCreator).stream().map(CompanyPersistenceMapper::reconstituteDomain).toList();
+	}
 }

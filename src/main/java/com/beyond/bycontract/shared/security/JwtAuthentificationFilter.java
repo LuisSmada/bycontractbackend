@@ -1,5 +1,7 @@
 package com.beyond.bycontract.shared.security;
 
+import com.beyond.bycontract.shared.utils.CustomUserDetails;
+import com.beyond.bycontract.shared.utils.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,8 +24,7 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
 	private final JwtService jwtService;
 	private final UserDetailsService userDetailsService;
 
-
-	public JwtAuthentificationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+	public JwtAuthentificationFilter(JwtService jwtService , UserDetailsService userDetailsService) {
 		this.jwtService = jwtService;
 		this.userDetailsService = userDetailsService;
 	}
@@ -67,6 +68,7 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
 
 			if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 				//Find the user in the database by his email
+
 				UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
 				//if is token is valid, say to spring that the user is authenticated
@@ -76,7 +78,7 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
 					SecurityContextHolder.getContext().setAuthentication(authToken);
 				}
 			}
-		} catch (UsernameNotFoundException ignored) {
+		} catch (Exception ignored) {
 		}
 
 
