@@ -21,6 +21,9 @@ public class CompanyEntity {
 	@JoinColumn(name = "id_creator", nullable = false)
 	private UserEntity creator;
 
+	@OneToOne(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+	private MainContactCompanyEntity mainContactCompany;
+
 	@Column(name = "name")
 	private String name;
 
@@ -42,12 +45,13 @@ public class CompanyEntity {
 	public CompanyEntity() {
 	}
 
-	public CompanyEntity(UUID id, UserEntity creator, String name, String siret, String address, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+	public CompanyEntity(UUID id, UserEntity creator, String name, String siret, String address, MainContactCompanyEntity mainContactCompany, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 		this.id = id;
 		this.creator = creator;
 		this.name = name;
 		this.siret = siret;
 		this.address = address;
+		this.mainContactCompany = mainContactCompany;
 		this.createdAt = createdAt;
 		this.modifiedAt = modifiedAt;
 	}
@@ -106,6 +110,21 @@ public class CompanyEntity {
 
 	public void setModifiedAt(LocalDateTime modifiedAt) {
 		this.modifiedAt = modifiedAt;
+	}
+
+	public MainContactCompanyEntity getMainContactCompany() {
+		return mainContactCompany;
+	}
+
+	public void setMainContactCompany(MainContactCompanyEntity contact) {
+		if (contact == null) {
+			if (this.mainContactCompany != null) {
+				this.mainContactCompany.setCompany(null);
+			}
+		} else {
+			contact.setCompany(this); // Règle d'or : On synchronise l'enfant vers le parent
+		}
+		this.mainContactCompany = contact;
 	}
 
 	@Override

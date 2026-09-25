@@ -9,6 +9,7 @@ public class Company {
 	private String name;
 	private String siret;
 	private String address;
+	private MainContactCompany mainContactCompany;
 	private LocalDateTime createdAt;
 	private LocalDateTime modifiedAt;
 
@@ -16,27 +17,41 @@ public class Company {
 	}
 
 	//CONSTRUCTOR FOR THE CREATION OF A NEW COMPANY
-	public Company(String name, UUID idCreator,  String siret, String address, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+	public Company(String name, UUID idCreator,  String siret, String address, MainContactCompany mainContactCompany, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 		this.idCreator = idCreator;
 		this.name = name;
 		this.siret = siret;
 		this.address = address;
+		this.mainContactCompany = mainContactCompany;
 		this.createdAt = createdAt;
 		this.modifiedAt = modifiedAt;
 	}
 
-	public Company(UUID id,  String name,  UUID idCreator, String siret, String address, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+	public Company(UUID id,  String name,  UUID idCreator, String siret, String address, MainContactCompany mainContactCompany, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 		this.id = id;
 		this.idCreator = idCreator;
 		this.name = name;
 		this.siret = siret;
 		this.address = address;
+		this.mainContactCompany = mainContactCompany;
 		this.createdAt = createdAt;
 		this.modifiedAt = modifiedAt;
 	}
 
-	public static Company create(String name, UUID idCreator,  String siret, String address) {
-		return new Company( name, idCreator, siret, address, LocalDateTime.now(), LocalDateTime.now());
+	public static Company create(String name, UUID idCreator,  String siret, String address, MainContactCompany mainContactCompany) {
+		return new Company( name, idCreator, siret, address, mainContactCompany, LocalDateTime.now(), LocalDateTime.now());
+	}
+
+	public void update(String newName, String newSiret, String newAddress) {
+		if (newName != null && !newName.trim().isEmpty()) {
+			this.name = newName;
+		}
+		if (newSiret != null && !newSiret.trim().isEmpty()) {
+			this.siret = newSiret;
+		}
+		if (newAddress != null && !newAddress.trim().isEmpty()) {
+			this.address = newAddress;
+		}
 	}
 
 	public UUID getId() {
@@ -65,6 +80,10 @@ public class Company {
 
 	public LocalDateTime getModifiedAt() {
 		return modifiedAt;
+	}
+
+	public MainContactCompany getMainContactCompany() {
+		return mainContactCompany;
 	}
 
 	@Override

@@ -34,7 +34,9 @@ public record FindContractResponse(
 
 	public record CompanyDto(
 			UUID id,
-			String name
+			String name,
+			String siret,
+			MainContactDtoFC mainContact
 	) {
 	}
 
@@ -43,6 +45,14 @@ public record FindContractResponse(
 			String plainText,
 			String signedPdfUrl,
 			LocalDateTime modifiedAt
+	) {
+	}
+
+	public record MainContactDtoFC(
+			String firstName,
+			String lastName,
+			String email,
+			String phone
 	) {
 	}
 

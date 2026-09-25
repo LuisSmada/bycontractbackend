@@ -2,8 +2,10 @@ package com.beyond.bycontract.company.presentation;
 
 import com.beyond.bycontract.company.application.dto.CompanyResponse;
 import com.beyond.bycontract.company.application.dto.CreateCompanyCommand;
+import com.beyond.bycontract.company.application.dto.UpdateCompanyCommand;
 import com.beyond.bycontract.company.application.service.CompanyService;
 import com.beyond.bycontract.company.presentation.dto.CreateCompanyRequest;
+import com.beyond.bycontract.company.presentation.dto.UpdateCompanyRequest;
 import com.beyond.bycontract.shared.utils.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,12 @@ public class CompanyController {
 	@ResponseStatus(HttpStatus.OK)
 	public List<CompanyResponse> getMyCompanies(@AuthenticationPrincipal CustomUserDetails currentUser) {
 		return service.getAllCompaniesByIdCreator(currentUser.getId());
+	}
+
+	@PatchMapping("{idCompany}")
+	public CompanyResponse updateCompanyById(@PathVariable UUID idCompany, @Valid @RequestBody UpdateCompanyRequest request, @AuthenticationPrincipal CustomUserDetails currentUser) {
+		UpdateCompanyCommand command = request.toCommand(idCompany, currentUser.getId());
+		return service.updateCompanyById(command);
 	}
 
 	@GetMapping("/test-role")

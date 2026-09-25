@@ -8,10 +8,16 @@ import java.util.UUID;
 public record FindTemplateResponse(
 		UUID id,
 		String name,
-		String authorName,
+		AuthorDto author,
 		JsonNode body,
 		String variablesDefinition,
 		LocalDateTime createdAt,
 		LocalDateTime modifiedAt
 ) {
+	public record AuthorDto(
+			UUID id,
+			String firstName,
+			String lastName
+	) {
+	}
 }

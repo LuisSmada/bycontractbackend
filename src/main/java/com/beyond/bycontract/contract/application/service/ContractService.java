@@ -14,6 +14,7 @@ import com.beyond.bycontract.user.domain.model.User;
 import com.beyond.bycontract.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -29,7 +30,15 @@ public class ContractService {
 	private final CompanyRepository companyRepository;
 
 	@Transactional
-	public ContractResponse create(CreateContractCommand command) {
+	public ContractResponse create(CreateContractCommand command)  {
+
+		User author = userRepository.getUserById(command.idAuthor()).orElseThrow(() -> new UserNotFoundException("No user with id: " + command.idAuthor()));
+		Company stakeholder = companyRepository.getCompanyById(command.idCompany()).orElseThrow(() -> new CompanyNotFoundException("No company found with id: " + command.idCompany()));
+
+		//VERIFY THAT THE STAKEHOLDER IS REALLY FROM THE CONTACT OF THE CURRENT USER
+		if(!stakeholder.getIdCreator().equals(author.getId())) {
+			throw new AccessDeniedException("You do not have the authorization to use this stakeholder");
+		}
 
 		Contract contract = Contract.create(
 				command.name(),
@@ -47,15 +56,12 @@ public class ContractService {
 
 		Contract savedContract = repository.create(contract);
 
-		User author = userRepository.getUserById(savedContract.getIdAuthor()).orElseThrow(() -> new UserNotFoundException("No user with id: " + savedContract.getIdAuthor()));
-		Company stakeholder = companyRepository.getCompanyById(savedContract.getIdCompany()).orElseThrow(() -> new CompanyNotFoundException("No company found with id: " + savedContract.getIdCompany()));
-
 		return new ContractResponse(
 				savedContract.getId(),
 				savedContract.getName(),
 				savedContract.getContractStatus(),
-				new ContractResponse.AuthorDto(author.getFirstName(), author.getLastName()),
-				new ContractResponse.CompanyDto(stakeholder.getName()),
+				new ContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
+				new ContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName()),
 				savedContract.getCreatedAt(),
 				savedContract.getModifiedAt()
 		);
@@ -87,8 +93,8 @@ public class ContractService {
 					contract.getId(),
 					contract.getName(),
 					contract.getContractStatus(),
-					new ContractResponse.AuthorDto(author.getFirstName(), author.getLastName()),
-					new ContractResponse.CompanyDto(stakeholder.getName()),
+					new ContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
+					new ContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName()),
 					contract.getCreatedAt(),
 					contract.getModifiedAt()
 			);
@@ -113,7 +119,12 @@ public class ContractService {
 				contract.getName(),
 				contract.getValue(),
 				new FindContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
-				new FindContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName()),
+				new FindContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName(), stakeholder.getSiret(), new FindContractResponse.MainContactDtoFC(
+						stakeholder.getMainContactCompany().getFirstName(),
+						stakeholder.getMainContactCompany().getLastName(),
+						stakeholder.getMainContactCompany().getEmail(),
+						stakeholder.getMainContactCompany().getPhone()
+				) ),
 				new FindContractResponse.ContractContentDto(
 						contract.getContractContent().getBody(),
 						contract.getContractContent().getPlainText(),

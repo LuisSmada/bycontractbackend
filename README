@@ -57,3 +57,20 @@ java.util.UUID.randomUUID().toString()
 ApplicationConfig, c'est le bureau de la sécurité à l'entrée du bâtiment. Il définit les règles : qui est le vigile, quel type de scanner de badge utiliser (le PasswordEncoder), et comment vérifier la liste des employés. Il n'y a qu'un seul bureau de sécurité pour tout le bâtiment.
 
 CustomUserDetails, c'est le badge nominatif que l'on donne à un employé (ex: Adams) quand il rentre. Ce badge contient son nom, son ID, et ses droits d'accès (rôles). Il y a autant de badges que d'employés connectés.
+
+
+************************************
+
+-- Insertion pour le premier contact (Idemia)
+INSERT INTO main_contact_companies (id_company, first_name, last_name, email, phone, created_at, modified_at)
+VALUES (
+    (SELECT id FROM companies WHERE name ILIKE '%Idemia%' LIMIT 1),
+    'Luc', 'BRILLARD', 'lucbrillard@idemia.com', '0758651247', NOW(), NOW()
+);
+
+-- Insertion pour le deuxième contact (Dassault)
+INSERT INTO main_contact_companies (id_company, first_name, last_name, email, phone, created_at, modified_at)
+VALUES (
+    (SELECT id FROM companies WHERE name ILIKE '%Dassault%' LIMIT 1),
+    'Lyne', 'BOURDON', 'lynebourdon@dassault.com', '0698143298', NOW(), NOW()
+);

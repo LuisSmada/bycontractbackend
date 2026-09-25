@@ -6,8 +6,14 @@ import java.util.UUID;
 public record TemplateResponse(
 		UUID id,
 		String name,
-		String authorName,
+		AuthorDto author,
 		LocalDateTime createdAt,
 		LocalDateTime modifiedAt
 ) {
+	public record AuthorDto(
+			UUID id,
+			String firstName,
+			String lastName
+	) {
+	}
 }

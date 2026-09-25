@@ -28,6 +28,7 @@ public class Contract {
 	public Contract() {
 	}
 
+	//CONSTRUCTOR FOR THE CREATION OF A CONTRACT
 	public Contract(String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, ContractContent contractContent, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 		this.name = name;
 		this.contractType = contractType;

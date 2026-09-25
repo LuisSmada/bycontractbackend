@@ -39,7 +39,8 @@ public class TemplateService {
 		Template savedTemplate = repository.createTemplate(template);
 		User userFound = userRepository.getUserById(savedTemplate.getIdAuthor()).orElseThrow(() -> new UsernameNotFoundException("User with id: " + savedTemplate.getIdAuthor() + " not found"));
 
-		return new TemplateResponse(savedTemplate.getId(), savedTemplate.getName(), userFound.getFirstName() + " " + userFound.getLastName(), template.getCreatedAt(), template.getModifiedAt());
+		return new TemplateResponse(savedTemplate.getId(), savedTemplate.getName(),
+				new TemplateResponse.AuthorDto(userFound.getId(), userFound.getFirstName(), userFound.getLastName()), template.getCreatedAt(), template.getModifiedAt());
 	}
 
 	public List<TemplateResponse> getAllTemplates() {
@@ -63,7 +64,7 @@ public class TemplateService {
 					return new TemplateResponse(
 							template.getId(),
 							template.getName(),
-							getFullName(author),
+							new TemplateResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
 							template.getCreatedAt(),
 							template.getModifiedAt()
 					);
@@ -86,7 +87,7 @@ public class TemplateService {
 		return new FindTemplateResponse(
 				template.getId(),
 				template.getName(),
-				getFullName(author),
+				new FindTemplateResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
 				template.getBody(),
 				template.getVariablesDefinition(),
 				template.getCreatedAt(),

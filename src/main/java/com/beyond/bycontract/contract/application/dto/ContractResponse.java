@@ -16,12 +16,14 @@ public record ContractResponse(
 		LocalDateTime modifiedAt
 ) {
 	public record AuthorDto(
+			UUID id,
 			String firstName,
 			String lastName
 	) {
 	}
 
 	public record CompanyDto(
+			UUID id,
 			String name
 	) {
 	}

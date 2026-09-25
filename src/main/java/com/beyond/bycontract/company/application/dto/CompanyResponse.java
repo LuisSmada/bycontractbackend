@@ -6,6 +6,14 @@ public record CompanyResponse(
 		UUID id,
 		String name,
 		String siret,
-		String address
+		String address,
+		MainContactResponse mainContact
 ) {
+	public record MainContactResponse(
+			String firstName,
+			String lastName,
+			String email,
+			String phone
+	) {
+	}
 }

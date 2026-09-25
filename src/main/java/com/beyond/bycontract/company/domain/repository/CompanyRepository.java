@@ -25,5 +25,5 @@ public interface CompanyRepository {
 
 	List<Company> getCompaniesByIdCreator(UUID userId);
 
-//	Company updateCompanyById(Company company);
+	Company updateCompanyById(Company company);
 }
