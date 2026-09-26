@@ -62,7 +62,7 @@ public class Contract {
 		this.modifiedAt = modifiedAt;
 	}
 
-	public static Contract create(String name, ContractType contractType, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, JsonNode body, String plainText) {
+	public static Contract create(String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, JsonNode body, String plainText) {
 		ContractContent newContent = null;
 		if (body != null) {
 			newContent = new ContractContent(body, plainText, null, LocalDateTime.now());
@@ -70,7 +70,7 @@ public class Contract {
 		return new Contract(
 				name,
 				contractType,
-				ContractStatus.DRAFT,
+				contractStatus,
 				idCompany,
 				idAuthor,
 				idTemplate,

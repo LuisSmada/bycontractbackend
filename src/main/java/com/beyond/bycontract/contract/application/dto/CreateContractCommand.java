@@ -1,5 +1,6 @@
 package com.beyond.bycontract.contract.application.dto;
 
+import com.beyond.bycontract.contract.domain.model.ContractStatus;
 import com.beyond.bycontract.contract.domain.model.ContractType;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -17,6 +18,7 @@ public record CreateContractCommand(
 		LocalDate effectiveDate,
 		LocalDate expirationDate,
 		ContractType contractType,
+		ContractStatus contractStatus,
 		BigDecimal value,
 		Boolean autoRenew
 ) {

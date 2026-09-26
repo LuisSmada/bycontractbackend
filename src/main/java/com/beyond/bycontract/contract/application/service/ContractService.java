@@ -43,6 +43,7 @@ public class ContractService {
 		Contract contract = Contract.create(
 				command.name(),
 				command.contractType(),
+				command.contractStatus(),
 				command.idCompany(),
 				command.idAuthor(),
 				command.idTemplate(),
