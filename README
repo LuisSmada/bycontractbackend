@@ -74,3 +74,8 @@ VALUES (
     (SELECT id FROM companies WHERE name ILIKE '%Dassault%' LIMIT 1),
     'Lyne', 'BOURDON', 'lynebourdon@dassault.com', '0698143298', NOW(), NOW()
 );
+
+---------------------------------------------
+
+L'URL publique de Railway suit ce format standard :
+postgresql://[USERNAME]:[PASSWORD]@[HOST]:[PORT]/[DATABASE]

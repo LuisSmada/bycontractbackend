@@ -64,7 +64,8 @@ public class ContractService {
 				new ContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
 				new ContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName()),
 				savedContract.getCreatedAt(),
-				savedContract.getModifiedAt()
+				savedContract.getModifiedAt(),
+				savedContract.getExpirationDate()
 		);
 
 	}
@@ -97,7 +98,8 @@ public class ContractService {
 					new ContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
 					new ContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName()),
 					contract.getCreatedAt(),
-					contract.getModifiedAt()
+					contract.getModifiedAt(),
+					contract.getExpirationDate()
 			);
 		}).toList();
 	}

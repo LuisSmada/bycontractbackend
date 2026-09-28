@@ -2,6 +2,7 @@ package com.beyond.bycontract.contract.application.dto;
 
 import com.beyond.bycontract.contract.domain.model.ContractStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,7 +14,8 @@ public record ContractResponse(
 		AuthorDto author,
 		CompanyDto company,
 		LocalDateTime createdAt,
-		LocalDateTime modifiedAt
+		LocalDateTime modifiedAt,
+		LocalDate expirationDate
 ) {
 	public record AuthorDto(
 			UUID id,

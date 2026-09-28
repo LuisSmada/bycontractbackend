@@ -61,9 +61,10 @@ public class SecurityConfig {
 		corsConfiguration.setAllowedOrigins(List.of(allowedOrigins));
 
 		// "OPTIONS" est crucial : le navigateur fait toujours une requête vide OPTIONS avant une vraie requête pour vérifier les droits
-		corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 		// Autoriser Next.js à nous envoyer le JWT via l'en-tête "Authorization" et du JSON via "Content-Type"
-		corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+//		corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+		corsConfiguration.setAllowedHeaders(List.of("*"));
 
 		//Authorize the cookie transport because by defautl navigators don't accept to attach cookie on requests from two differents ports
 		corsConfiguration.setAllowCredentials(true);
