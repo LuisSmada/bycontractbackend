@@ -13,4 +13,6 @@ public interface ContractRepository {
 	List<Contract> getAllContracts();
 
 	Optional<Contract> getContractById(UUID id);
+
+	Contract updateContract(Contract contract);
 }

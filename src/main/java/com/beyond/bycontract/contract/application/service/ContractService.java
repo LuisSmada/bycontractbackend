@@ -6,9 +6,11 @@ import com.beyond.bycontract.company.domain.repository.CompanyRepository;
 import com.beyond.bycontract.contract.application.dto.ContractResponse;
 import com.beyond.bycontract.contract.application.dto.CreateContractCommand;
 import com.beyond.bycontract.contract.application.dto.FindContractResponse;
+import com.beyond.bycontract.contract.application.dto.UpdateContractCommand;
 import com.beyond.bycontract.contract.domain.exception.ContractNotfoundException;
 import com.beyond.bycontract.contract.domain.model.Contract;
 import com.beyond.bycontract.contract.domain.repository.ContractRepository;
+import com.beyond.bycontract.contract.presentation.dto.UpdateContractRequest;
 import com.beyond.bycontract.user.domain.exception.UserNotFoundException;
 import com.beyond.bycontract.user.domain.model.User;
 import com.beyond.bycontract.user.domain.repository.UserRepository;
@@ -30,7 +32,7 @@ public class ContractService {
 	private final CompanyRepository companyRepository;
 
 	@Transactional
-	public ContractResponse create(CreateContractCommand command)  {
+	public ContractResponse create(CreateContractCommand command) throws Exception {
 
 		User author = userRepository.getUserById(command.idAuthor()).orElseThrow(() -> new UserNotFoundException("No user with id: " + command.idAuthor()));
 		Company stakeholder = companyRepository.getCompanyById(command.idCompany()).orElseThrow(() -> new CompanyNotFoundException("No company found with id: " + command.idCompany()));
@@ -121,6 +123,7 @@ public class ContractService {
 				contract.getExpirationDate(),
 				contract.getName(),
 				contract.getValue(),
+				contract.getVersion(),
 				new FindContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
 				new FindContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName(), stakeholder.getSiret(), new FindContractResponse.MainContactDtoFC(
 						stakeholder.getMainContactCompany().getFirstName(),
@@ -135,6 +138,60 @@ public class ContractService {
 						contract.getContractContent().getModifiedAt()
 				),
 				contract.getIdTemplate()
+		);
+	}
+
+	public FindContractResponse updateContractById(UpdateContractCommand command) {
+		Contract contract = repository.getContractById(command.idContract()).orElseThrow(() -> new ContractNotfoundException(command.idContract()));
+		User author = userRepository.getUserById(contract.getIdAuthor()).orElseThrow(() -> new UserNotFoundException(contract.getIdAuthor()));
+
+		if (!contract.getIdAuthor().equals(command.idRequester())) {
+			throw new AccessDeniedException("You are not allowed to update this contract");
+		}
+
+		contract.update(
+				command.name(),
+				command.contractType(),
+				command.contractStatus(),
+				command.idCompany(),
+				command.effectiveDate(),
+				command.expirationDate(),
+				command.autoRenew(),
+				command.value(),
+				command.bodyJson(),
+				command.bodyText()
+		);
+
+		Contract updatedContract = repository.updateContract(contract);
+
+		Company stakeholder = companyRepository.getCompanyById(updatedContract.getIdCompany()).orElseThrow(() -> new CompanyNotFoundException(contract.getIdCompany()));
+
+		return new FindContractResponse(
+				updatedContract.getId(),
+				updatedContract.getAutoRenew(),
+				updatedContract.getContractStatus(),
+				updatedContract.getContractType(),
+				updatedContract.getCreatedAt(),
+				updatedContract.getModifiedAt(),
+				updatedContract.getEffectiveDate(),
+				updatedContract.getExpirationDate(),
+				updatedContract.getName(),
+				updatedContract.getValue(),
+				contract.getVersion(),
+				new FindContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
+				new FindContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName(), stakeholder.getSiret(), new FindContractResponse.MainContactDtoFC(
+						stakeholder.getMainContactCompany().getFirstName(),
+						stakeholder.getMainContactCompany().getLastName(),
+						stakeholder.getMainContactCompany().getEmail(),
+						stakeholder.getMainContactCompany().getPhone()
+				) ),
+				new FindContractResponse.ContractContentDto(
+						updatedContract.getContractContent().getBody(),
+						updatedContract.getContractContent().getPlainText(),
+						updatedContract.getContractContent().getSignedPdfUrl(),
+						updatedContract.getContractContent().getModifiedAt()
+				),
+				updatedContract.getIdTemplate()
 		);
 	}
 }

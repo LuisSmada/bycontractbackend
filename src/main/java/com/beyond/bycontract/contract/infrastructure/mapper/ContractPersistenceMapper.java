@@ -34,7 +34,8 @@ public class ContractPersistenceMapper {
 					entity.getValue(),
 					contractContent,
 					entity.getCreatedAt(),
-					entity.getModifiedAt()
+					entity.getModifiedAt(),
+					entity.getVersion()
 			);
 		} catch (Exception e) {
 			throw new RuntimeException("Erreur de mapping BDD -> Domaine", e);
@@ -105,7 +106,7 @@ public class ContractPersistenceMapper {
 			contractEntity.setContent(contractContentEntity);
 		}
 
-		//createdAt and modifiedAt are not added because they are not updatable and not insertable through an entity,so it's useless to add it
+		//createdAt, modifiedAt and version are not added because they are not updatable and not insertable through an entity,so it's useless to add it
 
 		return contractEntity;
 	}

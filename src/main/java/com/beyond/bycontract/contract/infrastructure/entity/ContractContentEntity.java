@@ -31,9 +31,6 @@ public class ContractContentEntity {
 	@Column(name = "signed_pdf_url")
 	private String signedPdfUrl;
 
-	@Column(name = "version", nullable = false)
-	private Integer version = 1;
-
 	@UpdateTimestamp
 	@Column(name = "modified_at")
 	private LocalDateTime modifiedAt;
@@ -47,7 +44,6 @@ public class ContractContentEntity {
 		this.body = body;
 		this.plainText = plainText;
 		this.signedPdfUrl = signedPdfUrl;
-		this.version = version;
 		this.modifiedAt = modifiedAt;
 	}
 
@@ -57,14 +53,6 @@ public class ContractContentEntity {
 
 	public void setModifiedAt(LocalDateTime modifiedAt) {
 		this.modifiedAt = modifiedAt;
-	}
-
-	public Integer getVersion() {
-		return version;
-	}
-
-	public void setVersion(Integer version) {
-		this.version = version;
 	}
 
 	public String getSignedPdfUrl() {
@@ -115,7 +103,6 @@ public class ContractContentEntity {
 				", body='" + body + '\'' +
 				", plainText='" + plainText + '\'' +
 				", signedPdfUrl='" + signedPdfUrl + '\'' +
-				", version=" + version +
 				", modifiedAt=" + modifiedAt +
 				'}';
 	}

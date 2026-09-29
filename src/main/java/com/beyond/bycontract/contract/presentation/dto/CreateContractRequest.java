@@ -24,8 +24,6 @@ public record CreateContractRequest(
 		@NotNull ContractStatus contractStatus,
 		BigDecimal value,
 		Boolean autoRenew
-
-
 ) {
 
 	public CreateContractCommand toCommand() {

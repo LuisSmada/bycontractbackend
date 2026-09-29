@@ -69,6 +69,10 @@ public class ContractEntity {
 	@Column(name = "modified_at")
 	private LocalDateTime modifiedAt;
 
+	@Version
+	@Column(name = "version", nullable = false)
+	private Integer version;
+
 	public ContractEntity() {
 	}
 
@@ -199,5 +203,13 @@ public class ContractEntity {
 
 	public void setModifiedAt(final LocalDateTime modifiedAt) {
 		this.modifiedAt = modifiedAt;
+	}
+
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
 	}
 }

@@ -20,6 +20,7 @@ public record FindContractResponse(
 		LocalDate expirationDate,
 		String name,
 		BigDecimal value,
+		Integer version,
 		AuthorDto author,
 		CompanyDto company,
 		ContractContentDto content,

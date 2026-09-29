@@ -1,12 +1,17 @@
 package com.beyond.bycontract.contract.presentation;
 
+import com.beyond.bycontract.company.application.dto.UpdateCompanyCommand;
 import com.beyond.bycontract.contract.application.dto.ContractResponse;
 import com.beyond.bycontract.contract.application.dto.FindContractResponse;
+import com.beyond.bycontract.contract.application.dto.UpdateContractCommand;
 import com.beyond.bycontract.contract.application.service.ContractService;
 import com.beyond.bycontract.contract.presentation.dto.CreateContractRequest;
+import com.beyond.bycontract.contract.presentation.dto.UpdateContractRequest;
+import com.beyond.bycontract.shared.utils.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +30,7 @@ public class ContractController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ContractResponse create(@Valid @RequestBody CreateContractRequest request) {
+	public ContractResponse create(@Valid @RequestBody CreateContractRequest request) throws Exception {
 		return service.create(request.toCommand());
 	}
 
@@ -39,5 +44,11 @@ public class ContractController {
 	@ResponseStatus(HttpStatus.OK)
 	public FindContractResponse getContractBydId(@PathVariable UUID id) {
 		return service.getContractById(id);
+	}
+
+	@PatchMapping("{id}")
+	public FindContractResponse updateContractById(@PathVariable UUID id, @Valid @RequestBody UpdateContractRequest request, @AuthenticationPrincipal CustomUserDetails currentUser) {
+		UpdateContractCommand command = request.toCommand(id, currentUser.getId());
+		return service.updateContractById(command);
 	}
 }

@@ -1,5 +1,6 @@
 package com.beyond.bycontract.contract.domain.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ public class Contract {
 	private ContractContent contractContent;
 	private LocalDateTime createdAt;
 	private LocalDateTime modifiedAt;
+	private Integer version;
 
 	public Contract() {
 	}
@@ -45,7 +47,7 @@ public class Contract {
 		this.modifiedAt = modifiedAt;
 	}
 
-	public Contract(UUID id, String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, ContractContent contractContent, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+	public Contract(UUID id, String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, ContractContent contractContent, LocalDateTime createdAt, LocalDateTime modifiedAt, Integer version ) {
 		this.id = id;
 		this.name = name;
 		this.contractType = contractType;
@@ -59,14 +61,19 @@ public class Contract {
 		this.value = value;
 		this.contractContent = contractContent;
 		this.createdAt = createdAt;
-		this.modifiedAt = modifiedAt;
+		this.version = version;
 	}
 
-	public static Contract create(String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, JsonNode body, String plainText) {
-		ContractContent newContent = null;
-		if (body != null) {
-			newContent = new ContractContent(body, plainText, null, LocalDateTime.now());
+	public static Contract create(String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, JsonNode body, String plainText) throws Exception {
+
+		if (body == null && plainText == null) {
+			throw new IllegalStateException("Cannot create a contract without text");
 		}
+
+		ContractContent newContent = new ContractContent(body, plainText, null, LocalDateTime.now());
+
+		LocalDate finalExpirationDate = autoRenew == true ? null : expirationDate;
+
 		return new Contract(
 				name,
 				contractType,
@@ -75,13 +82,56 @@ public class Contract {
 				idAuthor,
 				idTemplate,
 				effectiveDate,
-				expirationDate,
+				finalExpirationDate,
 				autoRenew,
 				value,
 				newContent,
 				LocalDateTime.now(),
 				LocalDateTime.now()
 		);
+	}
+
+	public void update(String newName, ContractType newContractType, ContractStatus newContractStatus, UUID newIdCompany, LocalDate newEffectiveDate, LocalDate newExpirationDate, Boolean newAutoRenew, BigDecimal newValue, JsonNode newBody, String newPlainText) {
+
+		if(newName != null && !newName.trim().isEmpty()) {
+			this.name = newName;
+		}
+
+		if(newContractType != null) {
+			this.contractType = newContractType;
+		}
+
+		if(newContractStatus != null) {
+			this.contractStatus = newContractStatus;
+		}
+
+		if(newIdCompany != null) {
+			this.idCompany = newIdCompany;
+		}
+
+		if(newEffectiveDate != null) {
+			this.effectiveDate = newEffectiveDate;
+		}
+
+		if(newValue != null) {
+			this.value = newValue;
+		}
+
+		//EXPIRATION DATE CAN BE NULL BECAUSE THE CONTRACT CAN BE AUTORENEWED AND AUTORENEW CAN BE FALSE
+		if (newAutoRenew != null) {
+			this.autoRenew = newAutoRenew;
+			if (Boolean.TRUE.equals(newAutoRenew)) {
+				this.expirationDate = null;
+			} else if (newExpirationDate != null) {
+				this.expirationDate = newExpirationDate;
+			}
+		}
+
+		if (newBody != null && newPlainText != null) {
+			this.contractContent = new ContractContent(newBody, newPlainText, this.contractContent.getSignedPdfUrl(), LocalDateTime.now());
+		}
+
+		this.modifiedAt = LocalDateTime.now();
 	}
 
 
@@ -141,6 +191,8 @@ public class Contract {
 		return modifiedAt;
 	}
 
+	public Integer getVersion() { return version; }
+
 	@Override
 	public String toString() {
 		return "Contract{" +
@@ -163,8 +215,8 @@ public class Contract {
 
 
 	public void sign() throws Exception {
-		if (contractStatus != ContractStatus.DRAFT) {
-			throw new IllegalStateException("Only draft contract can be signed");
+		if (contractStatus != ContractStatus.PENDING) {
+			throw new IllegalStateException("Only pending contracts can be signed");
 		}
 
 		contractStatus = ContractStatus.SIGNED;
