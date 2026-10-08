@@ -63,6 +63,7 @@ public class ContractService {
 				savedContract.getId(),
 				savedContract.getName(),
 				savedContract.getContractStatus(),
+				savedContract.getContractType(),
 				new ContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
 				new ContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName()),
 				savedContract.getCreatedAt(),
@@ -70,6 +71,10 @@ public class ContractService {
 				savedContract.getExpirationDate()
 		);
 
+	}
+
+	public void deleteContractById(UUID id) {
+		repository.deleteContractById(id);
 	}
 
 	public List<ContractResponse> getAllContracts() {
@@ -97,6 +102,7 @@ public class ContractService {
 					contract.getId(),
 					contract.getName(),
 					contract.getContractStatus(),
+					contract.getContractType(),
 					new ContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
 					new ContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName()),
 					contract.getCreatedAt(),

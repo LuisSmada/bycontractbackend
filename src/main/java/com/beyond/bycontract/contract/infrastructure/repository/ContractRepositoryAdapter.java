@@ -67,4 +67,9 @@ public class ContractRepositoryAdapter implements ContractRepository {
 
 	}
 
+	@Override
+	public void deleteContractById(UUID id) {
+		jpaRepository.deleteById(id);
+	}
+
 }

@@ -12,6 +12,7 @@ public class Template {
 	private JsonNode body;
 	// Stocke la configuration du formulaire (Quelles questions poser à l'utilisateur)
 	private String variablesDefinition;
+	private TemplateStatus status;
 	private UUID idAuthor;
 	private LocalDateTime createdAt;
 	private LocalDateTime modifiedAt;
@@ -20,27 +21,29 @@ public class Template {
 	}
 
 	//Constructor fot the creation
-	public Template(String name, JsonNode body, String variablesDefinition, UUID idAuthor, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+	public Template(String name, JsonNode body, String variablesDefinition, TemplateStatus status,  UUID idAuthor, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 		this.name = name;
 		this.body = body;
 		this.idAuthor = idAuthor;
 		this.variablesDefinition = variablesDefinition;
+		this.status = status;
 		this.createdAt = createdAt;
 		this.modifiedAt = modifiedAt;
 	}
 
-	public Template(UUID id, String name, JsonNode body, String variablesDefinition, UUID idAuthor, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+	public Template(UUID id, String name, JsonNode body, String variablesDefinition, TemplateStatus status, UUID idAuthor, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 		this.id = id;
 		this.name = name;
 		this.body = body;
 		this.variablesDefinition = variablesDefinition;
+		this.status = status;
 		this.idAuthor = idAuthor;
 		this.createdAt = createdAt;
 		this.modifiedAt = modifiedAt;
 	}
 
-	public static Template create(String name, JsonNode body, UUID idAuthor) {
-		return new Template(name, body, "{}", idAuthor, LocalDateTime.now(), LocalDateTime.now());
+	public static Template create(String name, TemplateStatus status , JsonNode body, UUID idAuthor) {
+		return new Template(name, body, "{}", status, idAuthor, LocalDateTime.now(), LocalDateTime.now());
 	}
 
 	public UUID getId() {
@@ -97,6 +100,14 @@ public class Template {
 
 	public void setModifiedAt(LocalDateTime modifiedAt) {
 		this.modifiedAt = modifiedAt;
+	}
+
+	public TemplateStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(TemplateStatus status) {
+		this.status = status;
 	}
 
 	@Override

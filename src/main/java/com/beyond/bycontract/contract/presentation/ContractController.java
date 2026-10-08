@@ -51,4 +51,10 @@ public class ContractController {
 		UpdateContractCommand command = request.toCommand(id, currentUser.getId());
 		return service.updateContractById(command);
 	}
+
+	@DeleteMapping("{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteById(@PathVariable UUID id) {
+		service.deleteContractById(id);
+	}
 }

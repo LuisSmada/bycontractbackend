@@ -15,4 +15,6 @@ public interface ContractRepository {
 	Optional<Contract> getContractById(UUID id);
 
 	Contract updateContract(Contract contract);
+
+	void deleteContractById(UUID id);
 }

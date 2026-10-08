@@ -12,6 +12,7 @@ public class TemplatePersistenceMapper {
 				entity.getName(),
 				entity.getBody(),
 				entity.getVariablesDefintion(),
+				entity.getStatus(),
 				entity.getUser().getId(),
 				entity.getCreatedAt(),
 				entity.getModifiedAt()
@@ -24,6 +25,7 @@ public class TemplatePersistenceMapper {
 		entity.setName(template.getName());
 		entity.setBody(template.getBody());
 		entity.setVariablesDefintion(template.getVariablesDefinition());
+		entity.setStatus(template.getStatus());
 
 		if (template.getIdAuthor() != null) {
 			UserEntity userEntity = new UserEntity();

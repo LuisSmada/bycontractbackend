@@ -1,5 +1,6 @@
 package com.beyond.bycontract.template.infrastructure.entity;
 
+import com.beyond.bycontract.template.domain.model.TemplateStatus;
 import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
@@ -33,6 +34,10 @@ public class TemplateEntity {
 	@Column(nullable = true)
 	private String variablesDefintion;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "template_status", nullable = false)
+	private TemplateStatus status;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "id_author")
 	private UserEntity user;
@@ -48,11 +53,12 @@ public class TemplateEntity {
 	public TemplateEntity() {
 	}
 
-	public TemplateEntity(UUID id, String name, JsonNode body, String variablesDefintion, UserEntity user, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+	public TemplateEntity(UUID id, String name, JsonNode body, String variablesDefintion, TemplateStatus status, UserEntity user, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 		this.id = id;
 		this.name = name;
 		this.body = body;
 		this.variablesDefintion = variablesDefintion;
+		this.status = status;
 		this.user = user;
 		this.createdAt = createdAt;
 		this.modifiedAt = modifiedAt;
@@ -112,6 +118,14 @@ public class TemplateEntity {
 
 	public void setModifiedAt(LocalDateTime modifiedAt) {
 		this.modifiedAt = modifiedAt;
+	}
+
+	public TemplateStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(TemplateStatus status) {
+		this.status = status;
 	}
 
 	@Override
