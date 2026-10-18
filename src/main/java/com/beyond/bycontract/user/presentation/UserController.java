@@ -1,7 +1,6 @@
 package com.beyond.bycontract.user.presentation;
 
-import com.beyond.bycontract.file.application.service.FileService;
-import com.beyond.bycontract.folder.application.service.FolderService;
+
 import com.beyond.bycontract.user.application.dto.SaveUserDto;
 import com.beyond.bycontract.user.application.dto.UpdateUserDto;
 import com.beyond.bycontract.user.application.service.UserService;
@@ -26,14 +25,10 @@ public class UserController {
 
 
 	private final UserService userService;
-	private final FileService fileService;
-	private final FolderService folderService;
 
 	@Autowired
-	public UserController(UserService userService, FileService fileService, FolderService folderService) {
+	public UserController(UserService userService) {
 		this.userService = userService;
-		this.fileService = fileService;
-		this.folderService = folderService;
 	}
 
 	@Operation(

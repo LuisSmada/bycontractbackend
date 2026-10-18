@@ -17,7 +17,8 @@ public record ContractResponse(
 		CompanyDto company,
 		LocalDateTime createdAt,
 		LocalDateTime modifiedAt,
-		LocalDate expirationDate
+		LocalDate expirationDate,
+		UUID idTemplate
 ) {
 	public record AuthorDto(
 			UUID id,

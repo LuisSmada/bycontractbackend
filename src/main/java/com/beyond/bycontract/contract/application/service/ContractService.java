@@ -9,8 +9,10 @@ import com.beyond.bycontract.contract.application.dto.FindContractResponse;
 import com.beyond.bycontract.contract.application.dto.UpdateContractCommand;
 import com.beyond.bycontract.contract.domain.exception.ContractNotfoundException;
 import com.beyond.bycontract.contract.domain.model.Contract;
+import com.beyond.bycontract.contract.domain.model.ContractStatus;
 import com.beyond.bycontract.contract.domain.repository.ContractRepository;
 import com.beyond.bycontract.contract.presentation.dto.UpdateContractRequest;
+import com.beyond.bycontract.shared.infrastructure.S3StorageService;
 import com.beyond.bycontract.user.domain.exception.UserNotFoundException;
 import com.beyond.bycontract.user.domain.model.User;
 import com.beyond.bycontract.user.domain.repository.UserRepository;
@@ -18,7 +20,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -30,6 +34,7 @@ public class ContractService {
 	private final ContractRepository repository;
 	private final UserRepository userRepository;
 	private final CompanyRepository companyRepository;
+	private final S3StorageService s3StorageService;
 
 	@Transactional
 	public ContractResponse create(CreateContractCommand command) throws Exception {
@@ -68,7 +73,8 @@ public class ContractService {
 				new ContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName()),
 				savedContract.getCreatedAt(),
 				savedContract.getModifiedAt(),
-				savedContract.getExpirationDate()
+				savedContract.getExpirationDate(),
+				savedContract.getIdTemplate()
 		);
 
 	}
@@ -107,14 +113,13 @@ public class ContractService {
 					new ContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName()),
 					contract.getCreatedAt(),
 					contract.getModifiedAt(),
-					contract.getExpirationDate()
+					contract.getExpirationDate(),
+					contract.getIdTemplate()
 			);
 		}).toList();
 	}
 
-
-	public FindContractResponse getContractById(UUID id) {
-		Contract contract = repository.getContractById(id).orElseThrow(() -> new ContractNotfoundException(id));
+	private FindContractResponse buildFindContractResponse(Contract contract) {
 		User author = userRepository.getUserById(contract.getIdAuthor()).orElseThrow(() -> new UserNotFoundException(contract.getIdAuthor()));
 		Company stakeholder = companyRepository.getCompanyById(contract.getIdCompany()).orElseThrow(() -> new CompanyNotFoundException(contract.getIdCompany()));
 
@@ -140,16 +145,22 @@ public class ContractService {
 				new FindContractResponse.ContractContentDto(
 						contract.getContractContent().getBody(),
 						contract.getContractContent().getPlainText(),
-						contract.getContractContent().getSignedPdfUrl(),
+						contract.getContractContent().getSignedPdfKey(),
 						contract.getContractContent().getModifiedAt()
 				),
 				contract.getIdTemplate()
 		);
 	}
 
+
+	public FindContractResponse getContractById(UUID id) {
+		Contract contract = repository.getContractById(id).orElseThrow(() -> new ContractNotfoundException(id));
+		return buildFindContractResponse(contract);
+
+	}
+
 	public FindContractResponse updateContractById(UpdateContractCommand command) {
 		Contract contract = repository.getContractById(command.idContract()).orElseThrow(() -> new ContractNotfoundException(command.idContract()));
-		User author = userRepository.getUserById(contract.getIdAuthor()).orElseThrow(() -> new UserNotFoundException(contract.getIdAuthor()));
 
 		if (!contract.getIdAuthor().equals(command.idRequester())) {
 			throw new AccessDeniedException("You are not allowed to update this contract");
@@ -170,34 +181,46 @@ public class ContractService {
 
 		Contract updatedContract = repository.updateContract(contract);
 
-		Company stakeholder = companyRepository.getCompanyById(updatedContract.getIdCompany()).orElseThrow(() -> new CompanyNotFoundException(contract.getIdCompany()));
+		return buildFindContractResponse(updatedContract);
+	}
 
-		return new FindContractResponse(
-				updatedContract.getId(),
-				updatedContract.getAutoRenew(),
-				updatedContract.getContractStatus(),
-				updatedContract.getContractType(),
-				updatedContract.getCreatedAt(),
-				updatedContract.getModifiedAt(),
-				updatedContract.getEffectiveDate(),
-				updatedContract.getExpirationDate(),
-				updatedContract.getName(),
-				updatedContract.getValue(),
-				contract.getVersion(),
-				new FindContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
-				new FindContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName(), stakeholder.getSiret(), new FindContractResponse.MainContactDtoFC(
-						stakeholder.getMainContactCompany().getFirstName(),
-						stakeholder.getMainContactCompany().getLastName(),
-						stakeholder.getMainContactCompany().getEmail(),
-						stakeholder.getMainContactCompany().getPhone()
-				) ),
-				new FindContractResponse.ContractContentDto(
-						updatedContract.getContractContent().getBody(),
-						updatedContract.getContractContent().getPlainText(),
-						updatedContract.getContractContent().getSignedPdfUrl(),
-						updatedContract.getContractContent().getModifiedAt()
-				),
-				updatedContract.getIdTemplate()
-		);
+	public FindContractResponse uploadSignedContract(UUID idContract, MultipartFile file, UUID idRequester) {
+		// 1. Récupérer le contrat
+		Contract contract = repository.getContractById(idContract)
+				.orElseThrow(() -> new ContractNotfoundException(idContract));
+
+		// 2. Sécurité : Vérifier que l'utilisateur a le droit (IDOR)
+		if (!contract.getIdAuthor().equals(idRequester)) {
+			throw new AccessDeniedException("Vous n'avez pas l'autorisation de modifier ce contrat");
+		}
+
+		// 3. Vérifier que c'est bien un PDF
+		if (!"application/pdf".equals(file.getContentType())) {
+			throw new IllegalArgumentException("Seuls les fichiers PDF sont acceptés");
+		}
+
+		String s3Key = s3StorageService.uploadSignedContract(idContract, file);
+		contract.markAsSigned(s3Key);
+
+		Contract updatedContract = repository.updateContract(contract);
+
+		return buildFindContractResponse(updatedContract);
+	}
+
+	public String getSignedPdfUrl(UUID idContract, UUID idRequester) {
+		Contract contract = repository.getContractById(idContract)
+				.orElseThrow(() -> new ContractNotfoundException(idContract));
+
+		// 2. Sécurité : Vérifier que l'utilisateur a le droit (IDOR)
+		if (!contract.getIdAuthor().equals(idRequester)) {
+			throw new AccessDeniedException("Vous n'avez pas l'autorisation de modifier ce contrat");
+		}
+
+		String s3Key = contract.getContractContent().getSignedPdfKey();
+		if(s3Key == null) {
+			throw new IllegalStateException("Aucun PDF signé n'existe pour ce contrat.");
+		}
+
+		return s3StorageService.getPresignedUrl(s3Key);
 	}
 }

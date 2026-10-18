@@ -59,6 +59,7 @@ public class ContractRepositoryAdapter implements ContractRepository {
 			contentEntity.setBody(contract.getContractContent().getBody());
 			contentEntity.setPlainText(contract.getContractContent().getPlainText());
 			contentEntity.setModifiedAt(contract.getContractContent().getModifiedAt());
+			contentEntity.setSignedPdfKey(contract.getContractContent().getSignedPdfKey());
 		}
 
 		ContractEntity savedEntity = jpaRepository.save(contractEntity);

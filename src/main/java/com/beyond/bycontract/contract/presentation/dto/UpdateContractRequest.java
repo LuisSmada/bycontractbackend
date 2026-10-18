@@ -19,7 +19,7 @@ public record UpdateContractRequest(
         @NotNull LocalDate effectiveDate,
         LocalDate expirationDate,
         @NotNull ContractType contractType,
-        @NotNull ContractStatus contractStatus,
+        @NotNull ContractStatus status,
         BigDecimal value,
         Boolean autoRenew
 ) {
@@ -34,7 +34,7 @@ public record UpdateContractRequest(
                 this.effectiveDate(),
                 this.expirationDate(),
                 this.contractType(),
-                this.contractStatus(),
+                this.status(),
                 this.value(),
                 this.autoRenew()
         );

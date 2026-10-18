@@ -11,10 +11,15 @@ import com.beyond.bycontract.shared.utils.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -56,5 +61,25 @@ public class ContractController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteById(@PathVariable UUID id) {
 		service.deleteContractById(id);
+	}
+
+	@PostMapping(value="/{id}/signature", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public FindContractResponse uploadSignature(@PathVariable UUID id, @RequestParam("file") MultipartFile file, @AuthenticationPrincipal CustomUserDetails currentUser ) {
+		if(file.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
+		}
+
+		return service.uploadSignedContract(id, file, currentUser.getId());
+	}
+
+	@GetMapping("/{id}/signature-url")
+	public ResponseEntity<Map<String, String>> getSignatureUrl(
+			@PathVariable UUID id,
+			@AuthenticationPrincipal CustomUserDetails currentUser) {
+
+		String presignedUrl = service.getSignedPdfUrl(id, currentUser.getId());
+
+		// On renvoie un JSON simple : { "url": "https://s3.eu-west-3.amazonaws.com/..." }
+		return ResponseEntity.ok(Map.of("url", presignedUrl));
 	}
 }

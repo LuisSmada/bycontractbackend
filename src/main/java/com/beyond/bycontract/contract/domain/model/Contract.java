@@ -128,7 +128,7 @@ public class Contract {
 		}
 
 		if (newBody != null && newPlainText != null) {
-			this.contractContent = new ContractContent(newBody, newPlainText, this.contractContent.getSignedPdfUrl(), LocalDateTime.now());
+			this.contractContent = new ContractContent(newBody, newPlainText, this.contractContent.getSignedPdfKey(), LocalDateTime.now());
 		}
 
 		this.modifiedAt = LocalDateTime.now();
@@ -214,11 +214,19 @@ public class Contract {
 	}
 
 
-	public void sign() throws Exception {
+	public void markAsSigned(String s3Key)  {
 		if (contractStatus != ContractStatus.PENDING) {
 			throw new IllegalStateException("Only pending contracts can be signed");
 		}
 
-		contractStatus = ContractStatus.SIGNED;
+		if(s3Key.isEmpty()) {
+			throw new IllegalStateException("The key of s3  should not be null");
+		}
+
+		this.contractStatus = ContractStatus.SIGNED;
+		this.modifiedAt = LocalDateTime.now();
+
+		this.contractContent.setSignedPdfKey(s3Key);
+		this.contractContent.setModifiedAt(this.modifiedAt);
 	}
 }

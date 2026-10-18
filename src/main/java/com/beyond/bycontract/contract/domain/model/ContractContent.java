@@ -11,24 +11,24 @@ public class ContractContent {
 	private UUID id;
 	private JsonNode body;
 	private String plainText;
-	private String signedPdfUrl;
+	private String signedPdfKey;
 	private LocalDateTime modifiedAt;
 
 	public ContractContent() {
 	}
 
-	public ContractContent(JsonNode body, String plainText, String signedPdfUrl, LocalDateTime modifiedAt) {
+	public ContractContent(JsonNode body, String plainText, String signedPdfKey, LocalDateTime modifiedAt) {
 		this.body = body;
 		this.plainText = plainText;
-		this.signedPdfUrl = signedPdfUrl;
+		this.signedPdfKey = signedPdfKey;
 		this.modifiedAt = modifiedAt;
 	}
 
-	public ContractContent(UUID id, JsonNode body, String plainText, String signedPdfUrl, LocalDateTime modifiedAt) {
+	public ContractContent(UUID id, JsonNode body, String plainText, String signedPdfKey, LocalDateTime modifiedAt) {
 		this.id = id;
 		this.body = body;
 		this.plainText = plainText;
-		this.signedPdfUrl = signedPdfUrl;
+		this.signedPdfKey = signedPdfKey;
 		this.modifiedAt = modifiedAt;
 	}
 
@@ -62,12 +62,12 @@ public class ContractContent {
 		this.plainText = plainText;
 	}
 
-	public String getSignedPdfUrl() {
-		return this.signedPdfUrl;
+	public String getSignedPdfKey() {
+		return this.signedPdfKey;
 	}
 
-	public void setSignedPdfUrl(final String signedPdfUrl) {
-		this.signedPdfUrl = signedPdfUrl;
+	public void setSignedPdfKey(String signedPdfKey) {
+		this.signedPdfKey = signedPdfKey;
 	}
 
 	public LocalDateTime getModifiedAt() {

@@ -28,8 +28,8 @@ public class ContractContentEntity {
 	@Column(name = "plain_text", columnDefinition = "TEXT")
 	private String plainText;
 
-	@Column(name = "signed_pdf_url")
-	private String signedPdfUrl;
+	@Column(name = "signed_pdf_key")
+	private String signedPdfKey;
 
 	@UpdateTimestamp
 	@Column(name = "modified_at")
@@ -38,12 +38,12 @@ public class ContractContentEntity {
 	public ContractContentEntity() {
 	}
 
-	public ContractContentEntity(UUID id, ContractEntity contract, JsonNode body, String plainText, String signedPdfUrl, Integer version, LocalDateTime modifiedAt) {
+	public ContractContentEntity(UUID id, ContractEntity contract, JsonNode body, String plainText, String signedPdfKey, Integer version, LocalDateTime modifiedAt) {
 		this.id = id;
 		this.contract = contract;
 		this.body = body;
 		this.plainText = plainText;
-		this.signedPdfUrl = signedPdfUrl;
+		this.signedPdfKey = signedPdfKey;
 		this.modifiedAt = modifiedAt;
 	}
 
@@ -55,12 +55,12 @@ public class ContractContentEntity {
 		this.modifiedAt = modifiedAt;
 	}
 
-	public String getSignedPdfUrl() {
-		return signedPdfUrl;
+	public String getSignedPdfKey() {
+		return signedPdfKey;
 	}
 
-	public void setSignedPdfUrl(String signedPdfUrl) {
-		this.signedPdfUrl = signedPdfUrl;
+	public void setSignedPdfKey(String signedPdfKey) {
+		this.signedPdfKey = signedPdfKey;
 	}
 
 	public String getPlainText() {
@@ -102,7 +102,7 @@ public class ContractContentEntity {
 				", contract=" + contract +
 				", body='" + body + '\'' +
 				", plainText='" + plainText + '\'' +
-				", signedPdfUrl='" + signedPdfUrl + '\'' +
+				", signedPdfKey='" + signedPdfKey + '\'' +
 				", modifiedAt=" + modifiedAt +
 				'}';
 	}

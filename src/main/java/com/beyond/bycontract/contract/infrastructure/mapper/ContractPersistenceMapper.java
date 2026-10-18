@@ -16,7 +16,7 @@ public class ContractPersistenceMapper {
 			ContractContent contractContent = new ContractContent(
 					entity.getContent().getBody(),
 					entity.getContent().getPlainText(),
-					entity.getContent().getSignedPdfUrl(),
+					entity.getContent().getSignedPdfKey(),
 					entity.getContent().getModifiedAt()
 			);
 
@@ -41,24 +41,6 @@ public class ContractPersistenceMapper {
 			throw new RuntimeException("Erreur de mapping BDD -> Domaine", e);
 		}
 
-
-		//try {
-		//	java.lang.reflect.Constructor<Contract> constructor = Contract.class.getDeclaredConstructor(
-		//			UUID.class, String.class, ContractType.class, ContractStatus.class, UUID.class, UUID.class, UUID.class, LocalDate.class, LocalDate.class, Boolean.class, BigDecimal.class, UUID.class, LocalDateTime.class, LocalDateTime.class
-		//	);
-		//	constructor.setAccessible(true);
-		//	return constructor.newInstance(
-		//			entity.getId(), entity.getName(), entity.getContractType(), entity.getContractStatus(),
-		//			entity.getCompany() != null ? entity.getCompany().getId() : null,
-		//			entity.getAuthor() != null ? entity.getAuthor().getId() : null,
-		//			entity.getTemplate() != null ? entity.getTemplate().getId() : null,
-		//			entity.getEffectiveDate(), entity.getExpirationDate(), entity.getAutoRenew(), entity.getValue(),
-		//			entity.getContent() != null ? entity.getContent().getId() : null,
-		//			entity.getCreatedAt(), entity.getModifiedAt()
-		//	);
-		//} catch (Exception e) {
-		//	throw new RuntimeException("Erreur de mapping BDD -> Domaine", e);
-		//}
 	}
 
 
@@ -102,6 +84,7 @@ public class ContractPersistenceMapper {
 			ContractContentEntity contractContentEntity = new ContractContentEntity();
 			contractContentEntity.setBody(contract.getContractContent().getBody());
 			contractContentEntity.setPlainText(contract.getContractContent().getPlainText());
+			contractContentEntity.setSignedPdfKey(contract.getContractContent().getSignedPdfKey());
 			contractContentEntity.setContract(contractEntity);
 			contractEntity.setContent(contractContentEntity);
 		}
