@@ -99,6 +99,7 @@ public class CompanyService {
 		);
 	}
 
+	@Transactional(readOnly = true)
 	public List<CompanyResponse> getAllCompaniesByIdCreator(UUID idCreator) {
 		List<Company> allCompanies = repository.getCompaniesByIdCreator(idCreator);
 		return allCompanies.stream().map(company -> new CompanyResponse(

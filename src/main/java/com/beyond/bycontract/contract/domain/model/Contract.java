@@ -61,6 +61,7 @@ public class Contract {
 		this.value = value;
 		this.contractContent = contractContent;
 		this.createdAt = createdAt;
+		this.modifiedAt = modifiedAt;
 		this.version = version;
 	}
 

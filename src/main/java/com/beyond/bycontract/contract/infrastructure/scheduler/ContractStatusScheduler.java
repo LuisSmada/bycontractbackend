@@ -23,7 +23,7 @@ public class ContractStatusScheduler {
     @Scheduled(cron = "0 0 1 * * *")
     @Transactional // 🚨 Obligatoire pour garantir la cohérence des 3 étapes
     public void updateContractStatuses() {
-
+        System.out.println("⏳ Le Scheduler s'est bien lancé !");
         LocalDate today = LocalDate.now();
         LocalDate oneMonthFromNow = today.plusMonths(1);
 
