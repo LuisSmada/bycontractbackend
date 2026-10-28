@@ -13,7 +13,6 @@ import java.util.UUID;
 
 public record CreateContractRequest(
 		@NotBlank String name,
-		@NotNull UUID idAuthor,
 		@NotNull UUID idCompany,
 		UUID idTemplate,
 		@NotNull String bodyText,
@@ -26,10 +25,10 @@ public record CreateContractRequest(
 		Boolean autoRenew
 ) {
 
-	public CreateContractCommand toCommand() {
+	public CreateContractCommand toCommand(@NotNull UUID idRequester) {
 		return new CreateContractCommand(
 				this.name(),
-				this.idAuthor(),
+				idRequester,
 				this.idCompany(),
 				this.idTemplate(),
 				this.bodyText,

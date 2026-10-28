@@ -1,5 +1,6 @@
 package com.beyond.bycontract.user.infrastructure.repository;
 
+import com.beyond.bycontract.user.domain.exception.UserNotFoundException;
 import com.beyond.bycontract.user.domain.model.User;
 import com.beyond.bycontract.user.domain.repository.UserRepository;
 import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
@@ -34,26 +35,23 @@ public class JpaUserRepository implements UserRepository {
 	}
 
 	@Override
-	public User updateUser(UUID idUserToUpdate, User user) {
-		User userFound = springDataUserRepository.findById(idUserToUpdate).map(UserPersistenceMapper::entityToDomain).orElseThrow(() -> new RuntimeException("User not found"));
+	public User updateUser(User user) {
+		UserEntity userEntity =  springDataUserRepository.findById(user.getId()).orElseThrow(() -> new UserNotFoundException(user.getId()));
+		userEntity.setFirstName(user.getFirstName());
+		userEntity.setLastName(user.getLastName());
+		userEntity.setEmail(user.getEmail());
 
-		if (user.getFirstName() != null) {
-			userFound.setFirstName(user.getFirstName());
-		}
-		if (user.getLastName() != null) {
-			userFound.setLastName(user.getLastName());
-		}
-		if (user.getEmail() != null) {
-			userFound.setEmail(user.getEmail());
-		}
-		if (user.getPassword() != null) {
-			userFound.setPassword(user.getPassword());
-		}
-
-		UserEntity userEntity = UserPersistenceMapper.domainToEntity(userFound);
-
-		return UserPersistenceMapper.entityToDomain(springDataUserRepository.save(userEntity));
+		UserEntity savedEntity = springDataUserRepository.save(userEntity);
+		return UserPersistenceMapper.entityToDomain(savedEntity);
 	}
+
+	@Override
+	public void changeUserPassword(User user) {
+		UserEntity userEntity =  springDataUserRepository.findById(user.getId()).orElseThrow(() -> new UserNotFoundException(user.getId()));
+		userEntity.setPassword(user.getPassword());
+		springDataUserRepository.save(userEntity);
+	}
+
 
 	@Override
 	public List<User> getUsersByIds(Collection<UUID> ids) {

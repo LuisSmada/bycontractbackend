@@ -23,6 +23,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/companies")
+// VERROU GLOBAL : Par défaut, il faut au moins être connecté pour toucher à ce contrôleur
+@PreAuthorize("isAuthenticated()")
 public class CompanyController {
 
 	private final CompanyService service;
@@ -39,29 +41,29 @@ public class CompanyController {
 		return service.create(command);
 	}
 
-	@GetMapping("/all")
-	@PreAuthorize("hasAuthority('USER')")
+	@GetMapping("/all-companies")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@ResponseStatus(HttpStatus.OK)
 	public List<CompanyResponse> getAllCompanies() {
-		return service.getAllCompanies();
+		return service.getAllCompanies(null);
 	}
 
 	@GetMapping("{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public CompanyResponse getCompanyById(@PathVariable UUID id) {
-		return service.getCompanyById(id);
+	public CompanyResponse getCompanyById(@PathVariable UUID id,@AuthenticationPrincipal CustomUserDetails currentUser) {
+		return service.getCompanyById(id, currentUser.getId());
 	}
 
 	@DeleteMapping("{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteById(@PathVariable UUID id) {
-		service.deleteById(id);
+	public void deleteById(@PathVariable UUID id, @AuthenticationPrincipal CustomUserDetails currentUser) {
+		service.deleteById(id, currentUser.getId());
 	}
 
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public List<CompanyResponse> getMyCompanies(@AuthenticationPrincipal CustomUserDetails currentUser) {
-		return service.getAllCompaniesByIdCreator(currentUser.getId());
+		return service.getAllCompanies(currentUser.getId());
 	}
 
 	@PatchMapping("{idCompany}")

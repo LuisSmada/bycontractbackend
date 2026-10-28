@@ -1,5 +1,7 @@
 package com.beyond.bycontract.application.service;
 
+import com.beyond.bycontract.user.application.dto.CreateUserCommand;
+import com.beyond.bycontract.user.application.dto.UserResponse;
 import com.beyond.bycontract.user.application.service.UserService;
 import com.beyond.bycontract.user.domain.model.User;
 import jakarta.transaction.Transactional;
@@ -21,18 +23,10 @@ class UserServiceIntegrationTest {
 	@Test
 	@DisplayName("Should create an user and assign an UUID")
 	void shouldCreateUserSuccessfully() {
-		User userToCreate = new User();
-		userToCreate.setFirstName("Adams");
-		userToCreate.setLastName("AYO");
-		userToCreate.setEmail("ayoadams@beyond.com");
-		userToCreate.setPassword("mdp");
-
-		User savedUser = userService.createUser(userToCreate);
-
+		CreateUserCommand command = new CreateUserCommand("Adams", "AYO", "ayoadams@beyond.com", "mdp");
+		UserResponse savedUser = userService.createUser(command);
 		assertNotNull(savedUser, "user saved should be not null");
-		assertNotNull(savedUser.getId(), "The id should be not null");
-
-		assertEquals("Adams", savedUser.getFirstName());
-		assertEquals("ayoadams@beyond.com", savedUser.getEmail());
+		assertEquals("Adams", savedUser.firstName());
+		assertEquals("ayoadams@beyond.com", savedUser.email());
 	}
 }

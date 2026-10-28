@@ -32,6 +32,12 @@ public class ContractRepositoryAdapter implements ContractRepository {
 	}
 
 	@Override
+	public List<Contract> getAllContractsByIdCreator(UUID idCreator) {
+		List<ContractEntity> contractEntities = jpaRepository.findAllByIdCreator(idCreator);
+		return contractEntities.stream().map(ContractPersistenceMapper::reconstituteDomain).toList();
+	}
+
+	@Override
 	public Optional<Contract> getContractById(UUID id) {
 		return jpaRepository.findById(id).map(ContractPersistenceMapper::reconstituteDomain);
 	}

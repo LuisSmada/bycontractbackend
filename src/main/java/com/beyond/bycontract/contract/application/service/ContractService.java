@@ -13,6 +13,7 @@ import com.beyond.bycontract.contract.domain.model.ContractStatus;
 import com.beyond.bycontract.contract.domain.repository.ContractRepository;
 import com.beyond.bycontract.contract.presentation.dto.UpdateContractRequest;
 import com.beyond.bycontract.shared.infrastructure.S3StorageService;
+import com.beyond.bycontract.shared.utils.AuthorizationUtils;
 import com.beyond.bycontract.user.domain.exception.UserNotFoundException;
 import com.beyond.bycontract.user.domain.model.User;
 import com.beyond.bycontract.user.domain.repository.UserRepository;
@@ -74,7 +75,8 @@ public class ContractService {
 				savedContract.getCreatedAt(),
 				savedContract.getModifiedAt(),
 				savedContract.getExpirationDate(),
-				savedContract.getIdTemplate()
+				savedContract.getIdTemplate(),
+				savedContract.getValue()
 		);
 
 	}
@@ -83,9 +85,11 @@ public class ContractService {
 		repository.deleteContractById(id);
 	}
 
-	public List<ContractResponse> getAllContracts() {
+	public List<ContractResponse> getAllContracts(UUID idCreator) {
 
-		List<Contract> contracts = repository.getAllContracts();
+		List<Contract> contracts = (idCreator == null)
+				? repository.getAllContracts()
+				: repository.getAllContractsByIdCreator(idCreator);
 
 		Set<UUID> idAuthors = contracts.stream().map(Contract::getIdAuthor).collect(Collectors.toSet());
 		List<User> authors = userRepository.getUsersByIds(idAuthors);
@@ -114,10 +118,13 @@ public class ContractService {
 					contract.getCreatedAt(),
 					contract.getModifiedAt(),
 					contract.getExpirationDate(),
-					contract.getIdTemplate()
+					contract.getIdTemplate(),
+					contract.getValue()
 			);
 		}).toList();
 	}
+
+
 
 	private FindContractResponse buildFindContractResponse(Contract contract) {
 		User author = userRepository.getUserById(contract.getIdAuthor()).orElseThrow(() -> new UserNotFoundException(contract.getIdAuthor()));
@@ -153,18 +160,16 @@ public class ContractService {
 	}
 
 
-	public FindContractResponse getContractById(UUID id) {
+	public FindContractResponse getContractById(UUID id, UUID idRequester) {
 		Contract contract = repository.getContractById(id).orElseThrow(() -> new ContractNotfoundException(id));
+		AuthorizationUtils.verifyOwnership(contract.getIdAuthor(), idRequester);
 		return buildFindContractResponse(contract);
 
 	}
 
 	public FindContractResponse updateContractById(UpdateContractCommand command) {
 		Contract contract = repository.getContractById(command.idContract()).orElseThrow(() -> new ContractNotfoundException(command.idContract()));
-
-		if (!contract.getIdAuthor().equals(command.idRequester())) {
-			throw new AccessDeniedException("You are not allowed to update this contract");
-		}
+		AuthorizationUtils.verifyOwnership(contract.getIdAuthor(), command.idRequester());
 
 		contract.update(
 				command.name(),
@@ -185,14 +190,8 @@ public class ContractService {
 	}
 
 	public FindContractResponse uploadSignedContract(UUID idContract, MultipartFile file, UUID idRequester) {
-		// 1. Récupérer le contrat
-		Contract contract = repository.getContractById(idContract)
-				.orElseThrow(() -> new ContractNotfoundException(idContract));
-
-		// 2. Sécurité : Vérifier que l'utilisateur a le droit (IDOR)
-		if (!contract.getIdAuthor().equals(idRequester)) {
-			throw new AccessDeniedException("Vous n'avez pas l'autorisation de modifier ce contrat");
-		}
+		Contract contract = repository.getContractById(idContract).orElseThrow(() -> new ContractNotfoundException(idContract));
+		AuthorizationUtils.verifyOwnership(contract.getIdAuthor(), idRequester);
 
 		// 3. Vérifier que c'est bien un PDF
 		if (!"application/pdf".equals(file.getContentType())) {
@@ -208,13 +207,9 @@ public class ContractService {
 	}
 
 	public String getSignedPdfUrl(UUID idContract, UUID idRequester) {
-		Contract contract = repository.getContractById(idContract)
-				.orElseThrow(() -> new ContractNotfoundException(idContract));
+		Contract contract = repository.getContractById(idContract).orElseThrow(() -> new ContractNotfoundException(idContract));
 
-		// 2. Sécurité : Vérifier que l'utilisateur a le droit (IDOR)
-		if (!contract.getIdAuthor().equals(idRequester)) {
-			throw new AccessDeniedException("Vous n'avez pas l'autorisation de modifier ce contrat");
-		}
+		AuthorizationUtils.verifyOwnership(contract.getIdAuthor(), idRequester);
 
 		String s3Key = contract.getContractContent().getSignedPdfKey();
 		if(s3Key == null) {

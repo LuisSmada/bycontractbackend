@@ -17,4 +17,6 @@ public interface ContractRepository {
 	Contract updateContract(Contract contract);
 
 	void deleteContractById(UUID id);
+
+	List<Contract> getAllContractsByIdCreator(UUID idCreator);
 }

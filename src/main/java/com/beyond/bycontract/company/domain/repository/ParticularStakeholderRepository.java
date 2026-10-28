@@ -16,5 +16,6 @@ public interface ParticularStakeholderRepository {
     ParticularStakeholder updateById(ParticularStakeholder particularStakeholder);
     Page<ParticularStakeholder> getAllParticularStakeholders(Pageable pageable);
     boolean existsByEmail(String email);
+    List<ParticularStakeholder> getParticularStakeholdersByIdCreator(UUID idCreator);
 
 }

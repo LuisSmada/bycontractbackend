@@ -3,14 +3,18 @@ package com.beyond.bycontract.company.application.service;
 import com.beyond.bycontract.company.application.dto.CreateParticularStakeholderCommand;
 import com.beyond.bycontract.company.application.dto.ParticularStakeholderResponse;
 import com.beyond.bycontract.company.application.dto.UpdateParticularStakeholderCommand;
+import com.beyond.bycontract.company.domain.exception.CompanyNotFoundException;
+import com.beyond.bycontract.company.domain.model.Company;
 import com.beyond.bycontract.company.domain.model.ParticularStakeholder;
 import com.beyond.bycontract.company.domain.repository.ParticularStakeholderRepository;
+import com.beyond.bycontract.shared.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -40,6 +44,7 @@ public class ParticularStakeholderService {
         }
 
         ParticularStakeholder stakeholder = ParticularStakeholder.create(
+                command.idRequester(),
                 command.firstName(),
                 command.lastName(),
                 command.email(),
@@ -51,9 +56,10 @@ public class ParticularStakeholderService {
         return buildResponse(savedStakeholder);
     }
 
-    public ParticularStakeholderResponse getById(UUID id) {
+    public ParticularStakeholderResponse getById(UUID id, UUID idRequester) {
         ParticularStakeholder stakeholder = repository.getParticularStakeholderById(id)
                 .orElseThrow(() -> new RuntimeException("Tiers particulier introuvable avec l'id : " + id));
+        AuthorizationUtils.verifyOwnership(stakeholder.getIdCreator(), idRequester);
 
         return buildResponse(stakeholder);
     }
@@ -63,6 +69,10 @@ public class ParticularStakeholderService {
         // le contenu tout en conservant les métadonnées (total elements, total pages, etc.)
         return repository.getAllParticularStakeholders(pageable)
                 .map(this::buildResponse);
+    }
+
+    public List<ParticularStakeholderResponse> getAllByIdCreator(UUID idCreator) {
+        return repository.getParticularStakeholdersByIdCreator(idCreator).stream().map(this::buildResponse).toList();
     }
 
     @Transactional
@@ -89,10 +99,9 @@ public class ParticularStakeholderService {
     }
 
     @Transactional
-    public void deleteById(UUID id) {
-        if (repository.getParticularStakeholderById(id).isEmpty()) {
-            throw new RuntimeException("Impossible de supprimer : tiers particulier introuvable.");
-        }
+    public void deleteById(UUID id, UUID idRequester) {
+        ParticularStakeholder particularStakeholder = repository.getParticularStakeholderById(id).orElseThrow(() -> new RuntimeException("No particular found with id"+ id));
+        AuthorizationUtils.verifyOwnership(particularStakeholder.getIdCreator(), idRequester);
         repository.deleteById(id);
     }
 }

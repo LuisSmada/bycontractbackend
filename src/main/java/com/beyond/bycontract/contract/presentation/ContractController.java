@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,20 +36,26 @@ public class ContractController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ContractResponse create(@Valid @RequestBody CreateContractRequest request) throws Exception {
-		return service.create(request.toCommand());
+	public ContractResponse create(@Valid @RequestBody CreateContractRequest request, @AuthenticationPrincipal CustomUserDetails currentUser) throws Exception {
+		return service.create(request.toCommand(currentUser.getId()));
+	}
+
+	@GetMapping("/all-contracts")
+	@PreAuthorize("hasAuthority('ADMIN')")
+	public List<ContractResponse> getAllContractsForAdmin() {
+		return service.getAllContracts(null);
 	}
 
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
-	public List<ContractResponse> getAllContracts() {
-		return service.getAllContracts();
+	public List<ContractResponse> getAllContracts(@AuthenticationPrincipal CustomUserDetails currentUser) {
+		return service.getAllContracts(currentUser.getId());
 	}
 
 	@GetMapping("{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public FindContractResponse getContractBydId(@PathVariable UUID id) {
-		return service.getContractById(id);
+	public FindContractResponse getContractBydId(@PathVariable UUID id, @AuthenticationPrincipal CustomUserDetails currentUser) {
+		return service.getContractById(id, currentUser.getId());
 	}
 
 	@PatchMapping("{id}")

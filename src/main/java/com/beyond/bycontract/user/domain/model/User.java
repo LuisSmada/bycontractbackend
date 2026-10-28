@@ -35,68 +35,59 @@ public class User {
 		this.modifiedAt = modifiedAt;
 	}
 
-	public UUID getId() {
-		return id;
+	//THE ID AND ROLE ARE NULL BECAUSE THE GENERATION OF THE ID IS HANDLED BY THE DATABASE
+	public static User create(String firstName, String lastName, String email, String password) {
+		return new User(null, firstName, lastName, email, password, null, LocalDateTime.now(), LocalDateTime.now());
 	}
 
-	public void setId(UUID id) {
-		this.id = id;
+	public void updateUser(String newFirstName, String newLastName, String newEmail) {
+		if(!newFirstName.trim().isEmpty()) {
+			this.firstName = newFirstName;
+		}
+		if(!newLastName.trim().isEmpty()) {
+			this.lastName = newLastName;
+		}
+		if(!newEmail.trim().isEmpty()) {
+			this.email = newEmail;
+		}
+	}
+
+	public void changePassword(String newPassword) {
+		if(!newPassword.trim().isEmpty()) {
+			this.password = newPassword;
+		}
+	}
+
+	public UUID getId() {
+		return id;
 	}
 
 	public String getFirstName() {
 		return firstName;
 	}
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
 	public String getLastName() {
 		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
 	}
 
 	public String getEmail() {
 		return email;
 	}
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
 	public String getPassword() {
 		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
 	}
 
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
 	public LocalDateTime getModifiedAt() {
 		return modifiedAt;
 	}
 
-	public void setModifiedAt(LocalDateTime modifiedAt) {
-		this.modifiedAt = modifiedAt;
-	}
-
 	public UserRole getRole() {
 		return role;
-	}
-
-	public void setRole(UserRole role) {
-		this.role = role;
 	}
 
 	@Override

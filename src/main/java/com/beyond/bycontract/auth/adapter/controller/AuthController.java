@@ -1,13 +1,17 @@
 package com.beyond.bycontract.auth.adapter.controller;
 
+import com.beyond.bycontract.auth.adapter.dto.ForgotPasswordRequest;
+import com.beyond.bycontract.auth.adapter.dto.ResetPasswordRequest;
 import com.beyond.bycontract.auth.application.dto.AuthResponseDto;
 import com.beyond.bycontract.auth.application.dto.LoginRequestDto;
 import com.beyond.bycontract.auth.application.dto.RegisterRequestDto;
 import com.beyond.bycontract.auth.application.service.AuthService;
 import com.beyond.bycontract.shared.utils.CustomUserDetails;
 import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -97,5 +101,17 @@ public class AuthController {
 		return ResponseEntity.ok()
 				.header(HttpHeaders.SET_COOKIE, deletedCookie.toString())
 				.body(Map.of("message", "Logout successfully"));
+	}
+
+	@PostMapping("/forgot-password")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+		authService.processForgotPassword(request.email());
+	}
+
+	@PostMapping("/reset-password")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+		authService.processResetPassword(request.token(), request.newPassword());
 	}
 }

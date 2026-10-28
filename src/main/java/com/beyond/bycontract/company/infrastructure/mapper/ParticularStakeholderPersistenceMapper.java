@@ -2,6 +2,7 @@ package com.beyond.bycontract.company.infrastructure.mapper;
 
 import com.beyond.bycontract.company.domain.model.ParticularStakeholder;
 import com.beyond.bycontract.company.infrastructure.entity.ParticularStakeholderEntity;
+import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
 
 public class ParticularStakeholderPersistenceMapper {
 
@@ -17,7 +18,11 @@ public class ParticularStakeholderPersistenceMapper {
         entity.setEmail(stakeholder.getEmail());
         entity.setPhone(stakeholder.getPhone());
         entity.setAddress(stakeholder.getAddress());
-
+        if(stakeholder.getIdCreator() != null) {
+            UserEntity userEntity = new UserEntity();
+            userEntity.setId(stakeholder.getIdCreator());
+            entity.setCreator(userEntity);
+        }
         // id, createdAt et modifiedAt ne sont pas ajoutés ici car ils sont générés automatiquement par JPA/Hibernate.
 
         return entity;
@@ -31,6 +36,7 @@ public class ParticularStakeholderPersistenceMapper {
         try {
             return new ParticularStakeholder(
                     entity.getId(),
+                    entity.getCreator().getId(),
                     entity.getFirstName(),
                     entity.getLastName(),
                     entity.getEmail(),

@@ -17,6 +17,6 @@ public class CompanyNotFoundException extends RuntimeException {
 	}
 
 	public CompanyNotFoundException(UUID id) {
-		super("Template with id " + id + " not found");
+		super("Company with id " + id + " not found");
 	}
 }

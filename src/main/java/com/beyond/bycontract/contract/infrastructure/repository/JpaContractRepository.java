@@ -3,6 +3,7 @@ package com.beyond.bycontract.contract.infrastructure.repository;
 import com.beyond.bycontract.contract.domain.model.ContractStatus;
 import com.beyond.bycontract.contract.infrastructure.entity.ContractEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,4 +32,7 @@ public interface JpaContractRepository extends JpaRepository<ContractEntity, UUI
 
     // Pour l'expiration globale (RISKED/ACTIVE/SIGNED -> EXPIRED)
     List<ContractEntity> findByContractStatusInAndExpirationDateLessThanEqual(List<ContractStatus> statuses, LocalDate thresholdDate);
+
+    @Query("SELECT c FROM ContractEntity c WHERE c.author.id = :idCreator")
+    List<ContractEntity> findAllByIdCreator(UUID idCreator);
 }

@@ -1,6 +1,9 @@
 package com.beyond.bycontract.company.infrastructure.entity;
 
+import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,6 +18,10 @@ public class ParticularStakeholderEntity {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_creator", nullable = false)
+    private UserEntity creator;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -38,8 +45,9 @@ public class ParticularStakeholderEntity {
     public ParticularStakeholderEntity() {
     }
 
-    public ParticularStakeholderEntity(UUID id, String firstName, String lastName, String email, String phone, String address, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public ParticularStakeholderEntity(UUID id, UserEntity creator, String firstName, String lastName, String email, String phone, String address, LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.id = id;
+        this.creator = creator;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -111,5 +119,13 @@ public class ParticularStakeholderEntity {
 
     public void setModifiedAt(LocalDateTime modifiedAt) {
         this.modifiedAt = modifiedAt;
+    }
+
+    public UserEntity getCreator() {
+        return creator;
+    }
+
+    public void setCreator(UserEntity creator) {
+        this.creator = creator;
     }
 }

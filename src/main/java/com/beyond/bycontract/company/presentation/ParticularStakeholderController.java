@@ -4,11 +4,14 @@ import com.beyond.bycontract.company.application.dto.ParticularStakeholderRespon
 import com.beyond.bycontract.company.application.service.ParticularStakeholderService;
 import com.beyond.bycontract.company.presentation.dto.CreateParticularStakeholderRequest;
 import com.beyond.bycontract.company.presentation.dto.UpdateParticularStakeholderRequest;
+import com.beyond.bycontract.shared.utils.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +19,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/particular-stakeholders")
+@PreAuthorize("isAuthenticated()")
 public class ParticularStakeholderController {
     private final ParticularStakeholderService service;
 
@@ -26,21 +30,26 @@ public class ParticularStakeholderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ParticularStakeholderResponse create(@RequestBody CreateParticularStakeholderRequest request) {
-        return service.create(request.toCommand());
+    public ParticularStakeholderResponse create(@RequestBody CreateParticularStakeholderRequest request, @AuthenticationPrincipal CustomUserDetails currentUser) {
+        return service.create(request.toCommand(currentUser.getId()));
     }
 
-    @GetMapping
-    public Page<ParticularStakeholderResponse> getAll(
+    @GetMapping("/all-particulars")
+    public Page<ParticularStakeholderResponse> getAllParticularsForAdmin(
             // @PageableDefault définit des valeurs par défaut si le client (Next.js) n'envoie pas les paramètres
             @PageableDefault(size = 20, sort = "lastName") Pageable pageable
     ) {
         return service.getAll(pageable);
     }
 
+    @GetMapping
+    public List<ParticularStakeholderResponse> getAll(@AuthenticationPrincipal CustomUserDetails currentUser) {
+        return service.getAllByIdCreator(currentUser.getId());
+    }
+
     @GetMapping("/{id}")
-    public ParticularStakeholderResponse getById(@PathVariable UUID id) {
-        return service.getById(id);
+    public ParticularStakeholderResponse getById(@PathVariable UUID id, @AuthenticationPrincipal CustomUserDetails currentUser) {
+        return service.getById(id, currentUser.getId());
     }
 
     @PatchMapping("/{id}")
@@ -53,8 +62,8 @@ public class ParticularStakeholderController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable UUID id) {
-        service.deleteById(id);
+    public void delete(@PathVariable UUID id, @AuthenticationPrincipal CustomUserDetails currentUser) {
+        service.deleteById(id, currentUser.getId());
     }
 
 }

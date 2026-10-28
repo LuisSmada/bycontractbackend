@@ -8,6 +8,7 @@ import com.beyond.bycontract.company.domain.exception.SiretAlreadyExistsExceptio
 import com.beyond.bycontract.company.domain.model.Company;
 import com.beyond.bycontract.company.domain.model.MainContactCompany;
 import com.beyond.bycontract.company.domain.repository.CompanyRepository;
+import com.beyond.bycontract.shared.utils.AuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -62,8 +63,8 @@ public class CompanyService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CompanyResponse> getAllCompanies() {
-		List<Company> allCompanies = repository.getAllCompanies();
+	public List<CompanyResponse> getAllCompanies(UUID idCreator) {
+		List<Company> allCompanies = idCreator == null ? repository.getAllCompanies() : repository.getCompaniesByIdCreator(idCreator);
 		return allCompanies.stream().map(company -> new CompanyResponse(
 				company.getId(),
 				company.getName(),
@@ -78,13 +79,16 @@ public class CompanyService {
 		)).toList();
 	}
 
-	public void deleteById(UUID id) {
+	public void deleteById(UUID id, UUID idRequester) {
+		Company company = repository.getCompanyById(id).orElseThrow(() -> new CompanyNotFoundException(id));
+		AuthorizationUtils.verifyOwnership(company.getIdCreator(), idRequester);
 		repository.deleteById(id);
 	}
 
 	@Transactional(readOnly = true)
-	public CompanyResponse getCompanyById(UUID id) {
-		Company company = repository.getCompanyById(id).orElseThrow(() -> new CompanyNotFoundException("No company found with id: " + id));
+	public CompanyResponse getCompanyById(UUID id, UUID idRequester) {
+		Company company = repository.getCompanyById(id).orElseThrow(() -> new CompanyNotFoundException(id));
+		AuthorizationUtils.verifyOwnership(company.getIdCreator(), idRequester);
 		return new CompanyResponse(
 				company.getId(),
 				company.getName(),
@@ -99,29 +103,10 @@ public class CompanyService {
 		);
 	}
 
-	@Transactional(readOnly = true)
-	public List<CompanyResponse> getAllCompaniesByIdCreator(UUID idCreator) {
-		List<Company> allCompanies = repository.getCompaniesByIdCreator(idCreator);
-		return allCompanies.stream().map(company -> new CompanyResponse(
-				company.getId(),
-				company.getName(),
-				company.getSiret(),
-				company.getAddress(),
-				new CompanyResponse.MainContactResponse(
-						company.getMainContactCompany().getFirstName(),
-						company.getMainContactCompany().getLastName(),
-						company.getMainContactCompany().getEmail(),
-						company.getMainContactCompany().getPhone()
-				)
-		)).toList();
-	}
-
 	@Transactional
 	public CompanyResponse updateCompanyById( UpdateCompanyCommand command) {
 		Company company = repository.getCompanyById(command.idCompany()).orElseThrow(() -> new CompanyNotFoundException(command.idCompany()));
-		if(!company.getIdCreator().equals(command.idRequester())) {
-			throw new AccessDeniedException("You are not allowed to modify this company");
-		}
+		AuthorizationUtils.verifyOwnership(company.getIdCreator(), command.idRequester());
 
 		//UPDATE VALUES OF THE COMPANY ITSELF
 		company.update(

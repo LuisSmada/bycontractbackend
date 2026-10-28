@@ -1,21 +1,25 @@
 package com.beyond.bycontract.user.presentation;
 
 
-import com.beyond.bycontract.user.application.dto.SaveUserDto;
-import com.beyond.bycontract.user.application.dto.UpdateUserDto;
+import com.beyond.bycontract.shared.utils.CustomUserDetails;
+import com.beyond.bycontract.user.application.dto.UserResponse;
 import com.beyond.bycontract.user.application.service.UserService;
 import com.beyond.bycontract.user.domain.model.User;
+import com.beyond.bycontract.user.presentation.dto.ChangeUserPasswordRequest;
+import com.beyond.bycontract.user.presentation.dto.CreateUserRequest;
+import com.beyond.bycontract.user.presentation.dto.UpdateUserRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -38,7 +42,7 @@ public class UserController {
 					required = true,
 					content = @Content(
 							mediaType = "application/json",
-							schema = @Schema(implementation = SaveUserDto.class)
+							schema = @Schema(implementation = CreateUserRequest.class)
 					)
 			),
 			responses = {
@@ -50,11 +54,9 @@ public class UserController {
 	)
 	@Parameter(name = "saveUserDto", description = "User information to be added", required = true)
 	@PostMapping
-	public User createUser(@RequestBody SaveUserDto saveUserDto) {
-		User user = new User(saveUserDto.getFirstName(), saveUserDto.getLastName(), saveUserDto.getEmail(), saveUserDto.getPassword());
-		return userService.createUser(user);
+	public UserResponse createUser(@RequestBody CreateUserRequest request) {
+		return userService.createUser(request.toCommand());
 	}
-
 
 	@Operation(
 			summary = "Retrieve a user by id",
@@ -71,8 +73,8 @@ public class UserController {
 	)
 	@Parameter(name = "id", description = "ID of the user to find", required = true, example = "1")
 	@GetMapping("{id}")
-	public ResponseEntity<User> getUserById(@PathVariable UUID id) {
-		return userService.getUserById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+	public UserResponse getUserById(@PathVariable UUID id) {
+		return userService.getUserById(id);
 	}
 
 
@@ -97,7 +99,7 @@ public class UserController {
 					required = true,
 					content = @Content(
 							mediaType = "application/json",
-							schema = @Schema(implementation = UpdateUserDto.class)
+							schema = @Schema(implementation = UpdateUserRequest.class)
 					)
 			),
 			responses = {
@@ -108,19 +110,17 @@ public class UserController {
 			}
 	)
 	@Parameter(name = "id", description = "ID of the user to update", required = true)
-	@PutMapping("{id}")
-	public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody UpdateUserDto updateUserDto) {
-		Optional<User> optionalUser = userService.getUserById(id);
+	@PatchMapping("{id}")
+	public UserResponse updateUser(@PathVariable UUID id, @RequestBody UpdateUserRequest request, @AuthenticationPrincipal CustomUserDetails currentUser ) {
+		return userService.updateUser(request.toCommand(id, currentUser.getId()));
+	}
 
-		if (optionalUser.isEmpty()) {
-			return ResponseEntity.notFound().build();
-		}
-		User user = optionalUser.get();
-		user.setFirstName(updateUserDto.getFirstName());
-		user.setLastName(updateUserDto.getLastName());
-		user.setEmail(updateUserDto.getEmail());
-		user.setPassword(updateUserDto.getPassword());
-
-		return ResponseEntity.ok(userService.updateUser(id, user));
+	@PatchMapping("/change-password")
+	@ResponseStatus(HttpStatus.NO_CONTENT) // Renvoie un code 204 (Succès sans corps)
+	public void changePassword(
+			@Valid @RequestBody ChangeUserPasswordRequest request,
+			@AuthenticationPrincipal CustomUserDetails currentUser
+	) {
+		userService.changePassword(request.toCommand(currentUser.getId()));
 	}
 }

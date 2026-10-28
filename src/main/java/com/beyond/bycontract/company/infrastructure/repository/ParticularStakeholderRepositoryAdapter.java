@@ -39,6 +39,12 @@ public class ParticularStakeholderRepositoryAdapter implements ParticularStakeho
     }
 
     @Override
+    public List<ParticularStakeholder> getParticularStakeholdersByIdCreator(UUID idCreator) {
+        return jpaRepository.findAllByIdCreator(idCreator).stream()
+                .map(ParticularStakeholderPersistenceMapper::reconstituteDomain).collect(Collectors.toList());
+    }
+
+    @Override
     public void deleteById(UUID id) {
         jpaRepository.deleteById(id);
     }

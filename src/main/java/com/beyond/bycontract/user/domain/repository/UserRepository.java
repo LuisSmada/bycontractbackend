@@ -17,7 +17,9 @@ public interface UserRepository {
 
 	void deleteUserById(UUID id);
 
-	User updateUser(UUID idUserToUpdate, User user);
+	User updateUser(User user);
+
+	void changeUserPassword(User user);
 
 	List<User> getUsersByIds(Collection<UUID> ids);
 }

@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public class ParticularStakeholder {
     private UUID id;
+    private UUID idCreator;
     private String firstName;
     private String lastName;
     private String email;
@@ -16,8 +17,9 @@ public class ParticularStakeholder {
     public ParticularStakeholder() {
     }
 
-    public ParticularStakeholder(UUID id, String firstName, String lastName, String email, String phone, String address, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public ParticularStakeholder(UUID id, UUID idCreator, String firstName, String lastName, String email, String phone, String address, LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.id = id;
+        this.idCreator = idCreator;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -39,11 +41,11 @@ public class ParticularStakeholder {
         }
     }
 
-    public static ParticularStakeholder create(String firstName, String lastName, String email, String phone, String address) {
+    public static ParticularStakeholder create(UUID idCreator, String firstName, String lastName, String email, String phone, String address) {
         validateRequiredFields(firstName, lastName, email);
 
         // L'ID et les dates sont à null car ils seront gérés par l'infrastructure (JPA)
-        return new ParticularStakeholder(null, firstName, lastName, email, phone, address, null, null);
+        return new ParticularStakeholder(null, idCreator, firstName, lastName, email, phone, address, null, null);
     }
 
     public void update(String newFirstName, String newLastName, String newEmail, String newPhone, String newAddress) {
@@ -96,5 +98,9 @@ public class ParticularStakeholder {
 
     public LocalDateTime getModifiedAt() {
         return modifiedAt;
+    }
+
+    public UUID getIdCreator() {
+        return idCreator;
     }
 }
