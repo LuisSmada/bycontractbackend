@@ -16,6 +16,7 @@ import com.beyond.bycontract.user.domain.repository.UserRepository;
 import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
 import com.beyond.bycontract.user.infrastructure.repository.JpaUserRepository;
 import com.beyond.bycontract.user.infrastructure.repository.SpringDataUserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +33,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
 	@Value("${application.cors.allowed-origins}")
@@ -44,14 +46,6 @@ public class AuthService {
 	private final PasswordResetTokenRepository tokenRepository;
 	private final EmailRepository emailRepository;
 
-	public AuthService(JpaUserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager, PasswordResetTokenRepository tokenRepository, EmailRepository emailRepository ) {
-		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
-		this.jwtService = jwtService;
-		this.authenticationManager = authenticationManager;
-		this.tokenRepository = tokenRepository;
-		this.emailRepository = emailRepository;
-	}
 
 	public AuthResponseDto register(RegisterRequestDto registerRequestDto) {
 		if(userRepository.getUserByEmail(registerRequestDto.getEmail()).isPresent()) {

@@ -1,11 +1,11 @@
 package com.beyond.bycontract.auth.adapter.controller;
 
-import com.beyond.bycontract.auth.adapter.dto.ForgotPasswordRequest;
-import com.beyond.bycontract.auth.adapter.dto.ResetPasswordRequest;
+import com.beyond.bycontract.auth.adapter.dto.*;
 import com.beyond.bycontract.auth.application.dto.AuthResponseDto;
 import com.beyond.bycontract.auth.application.dto.LoginRequestDto;
 import com.beyond.bycontract.auth.application.dto.RegisterRequestDto;
 import com.beyond.bycontract.auth.application.service.AuthService;
+import com.beyond.bycontract.auth.application.service.RegistrationOtpService;
 import com.beyond.bycontract.shared.utils.CustomUserDetails;
 import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
 import jakarta.validation.Valid;
@@ -27,17 +27,20 @@ public class AuthController {
 	private static final long COOKIE_MAX_AGE_SECONDS = 24 * 60 * 60;
 
 	private final AuthService authService;
+	private final RegistrationOtpService registrationOtpService;
 	private final boolean cookieSecure;
 	private final String cookieSameSite;
 
 	public AuthController(
 			AuthService authService,
+			RegistrationOtpService registrationOtpService,
 			@Value("${application.cookie.secure}") boolean cookieSecure,
 			@Value("${application.cookie.same-site}") String cookieSameSite
 	) {
 		this.authService = authService;
 		this.cookieSecure = cookieSecure;
 		this.cookieSameSite = cookieSameSite;
+		this.registrationOtpService = registrationOtpService;
 	}
 
 	@PostMapping("/register")
@@ -67,23 +70,17 @@ public class AuthController {
 	}
 
 	@GetMapping("/me")
-	public ResponseEntity<?> getCurrentUser() {
+	public ResponseEntity<GetCurrentUserResponse> getCurrentUser() {
 		// Ask at the spring boot wall who is authenticated
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-		//If no one authenticated or no cookie, send an error
-		if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
-			return ResponseEntity.status(401).body(Map.of("error", "Non authenticated"));
-		}
-
 		CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
 
-		return ResponseEntity.ok(Map.of(
-				"id", currentUser.getId(),
-				"email", currentUser.getUsername(),
-				"firstName", currentUser.getFirstName(),
-				"lastName", currentUser.getLastName(),
-				"role", currentUser.getAuthorities().iterator().next().getAuthority()
+		return ResponseEntity.ok(new GetCurrentUserResponse(
+				currentUser.getId(),
+				currentUser.getFirstName(),
+				currentUser.getLastName(),
+				currentUser.getUsername(),
+				currentUser.getAuthorities().iterator().next().getAuthority()
 		));
 	}
 
@@ -113,5 +110,23 @@ public class AuthController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
 		authService.processResetPassword(request.token(), request.newPassword());
+	}
+
+	@PostMapping("/register/initiate")
+	public ResponseEntity<Void> initiateRegistration(@Valid @RequestBody RegisterInitiateRequest request) {
+		registrationOtpService.initiateRegistration(request);
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/register/verify")
+	public ResponseEntity<?> verifyRegistration(@Valid @RequestBody RegisterVerifyRequest request) {
+		AuthResponseDto response = registrationOtpService.verifyRegistration(request);
+		return buildCookieResponse(response.getToken(), "Register successfully");
+	}
+
+	@PostMapping("/register/resend")
+	public ResponseEntity<Void> resendOtp(@Valid @RequestBody ResendOtpRequest request) {
+		registrationOtpService.resendOtp(request);
+		return ResponseEntity.ok().build();
 	}
 }

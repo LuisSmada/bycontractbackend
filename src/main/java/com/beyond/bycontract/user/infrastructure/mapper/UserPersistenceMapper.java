@@ -2,32 +2,28 @@ package com.beyond.bycontract.user.infrastructure.mapper;
 
 import com.beyond.bycontract.user.domain.model.User;
 import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 
-public class UserPersistenceMapper {
-	private UserPersistenceMapper() {
-		/* This utility class should not be instantiated */
-	}
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
+public interface UserPersistenceMapper {
 
+    @Mapping(source = "userRole", target = "role")
+    User entityToDomain(UserEntity entity);
 
-	public static User entityToDomain(UserEntity userEntity) {
-		return new User(userEntity.getId(), userEntity.getFirstName(), userEntity.getLastName(), userEntity.getEmail(), userEntity.getPassword(), userEntity.getUserRole(), userEntity.getCreatedAt(), userEntity.getModifiedAt());
-	}
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "modifiedAt", ignore = true)
+    @Mapping(source = "role", target = "userRole")
+    UserEntity domainToEntity(User user);
 
-	public static UserEntity domainToEntity(User user) {
-		UserEntity userEntity = new UserEntity();
-		if (user.getId() != null) {
-			userEntity.setId(user.getId());
-		}
-
-		//createdAt and modifiedAt are not added because they are not updatable and not insertable through an entity,so it's useless to add it
-
-		userEntity.setFirstName(user.getFirstName());
-		userEntity.setLastName(user.getLastName());
-		userEntity.setEmail(user.getEmail());
-		userEntity.setPassword(user.getPassword());
-		userEntity.setUserRole(user.getRole());
-
-		return userEntity;
-	}
-
+    // 🚨 POUR LA MISE À JOUR (C'est ce qui remplace tes setters)
+    // MapStruct va copier les champs de 'user' vers 'entityToUpdate'
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "modifiedAt", ignore = true)
+    @Mapping(source = "role", target = "userRole")
+    void updateEntityFromDomain(User user, @MappingTarget UserEntity entityToUpdate);
 }

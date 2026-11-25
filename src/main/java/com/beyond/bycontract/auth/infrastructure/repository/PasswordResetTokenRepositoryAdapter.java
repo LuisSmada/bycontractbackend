@@ -6,8 +6,6 @@ import com.beyond.bycontract.auth.infrastructure.entity.PasswordResetTokenEntity
 import com.beyond.bycontract.auth.infrastructure.mapper.PasswordResetTokenPersistenceMapper;
 import com.beyond.bycontract.user.domain.exception.UserNotFoundException;
 import com.beyond.bycontract.user.domain.model.User;
-import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
-import com.beyond.bycontract.user.infrastructure.mapper.UserPersistenceMapper;
 import com.beyond.bycontract.user.infrastructure.repository.JpaUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

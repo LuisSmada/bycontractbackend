@@ -4,6 +4,9 @@ import com.beyond.bycontract.template.domain.model.TemplateStatus;
 import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -14,6 +17,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "templates")
+@Getter
+@Setter
+@AllArgsConstructor
 public class TemplateEntity {
 
 	@Id
@@ -32,7 +38,7 @@ public class TemplateEntity {
 
 	@JdbcTypeCode(SqlTypes.JSON)
 	@Column(nullable = true)
-	private String variablesDefintion;
+	private String variablesDefinition;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "template_status", nullable = false)
@@ -53,80 +59,6 @@ public class TemplateEntity {
 	public TemplateEntity() {
 	}
 
-	public TemplateEntity(UUID id, String name, JsonNode body, String variablesDefintion, TemplateStatus status, UserEntity user, LocalDateTime createdAt, LocalDateTime modifiedAt) {
-		this.id = id;
-		this.name = name;
-		this.body = body;
-		this.variablesDefintion = variablesDefintion;
-		this.status = status;
-		this.user = user;
-		this.createdAt = createdAt;
-		this.modifiedAt = modifiedAt;
-	}
-
-	public UUID getId() {
-		return id;
-	}
-
-	public void setId(UUID id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public JsonNode getBody() {
-		return body;
-	}
-
-	public void setBody(JsonNode body) {
-		this.body = body;
-	}
-
-	public String getVariablesDefintion() {
-		return variablesDefintion;
-	}
-
-	public void setVariablesDefintion(String variablesDefintion) {
-		this.variablesDefintion = variablesDefintion;
-	}
-
-	public UserEntity getUser() {
-		return user;
-	}
-
-	public void setUser(UserEntity user) {
-		this.user = user;
-	}
-
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public LocalDateTime getModifiedAt() {
-		return modifiedAt;
-	}
-
-	public void setModifiedAt(LocalDateTime modifiedAt) {
-		this.modifiedAt = modifiedAt;
-	}
-
-	public TemplateStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(TemplateStatus status) {
-		this.status = status;
-	}
 
 	@Override
 	public String toString() {
@@ -134,7 +66,7 @@ public class TemplateEntity {
 				"id=" + id +
 				", name='" + name + '\'' +
 				", body='" + body + '\'' +
-				", variablesDefintion='" + variablesDefintion + '\'' +
+				", variablesDefinition='" + variablesDefinition + '\'' +
 				", user=" + user +
 				", createdAt=" + createdAt +
 				", modifiedAt=" + modifiedAt +

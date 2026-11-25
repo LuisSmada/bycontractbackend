@@ -79,3 +79,19 @@ VALUES (
 
 L'URL publique de Railway suit ce format standard :
 postgresql://[USERNAME]:[PASSWORD]@[HOST]:[PORT]/[DATABASE]
+
+********************************************
+
+Bash
+
+stripe listen --forward-to localhost:8080/api/v1/webhooks/stripe --events checkout.session.completed
+
+Si plus tard tu ajoutes la gestion des annulations ou des paiements échoués dans ton service, tu pourras les séparer par des virgules :
+Bash
+
+stripe listen --forward-to localhost:8080/api/v1/webhooks/stripe --events checkout.session.completed,customer.subscription.deleted
+
+(Alternative) Si tu veux forcer l'ancien comportement et recevoir absolument tous les événements Stripe avec leur contenu complet (snapshot), utilise cette commande :
+Bash
+
+stripe listen --forward-to localhost:8080/api/v1/webhooks/stripe --all-snapshot

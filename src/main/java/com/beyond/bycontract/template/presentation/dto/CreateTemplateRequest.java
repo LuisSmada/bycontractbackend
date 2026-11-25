@@ -8,14 +8,13 @@ import java.util.UUID;
 
 public record CreateTemplateRequest(
 		String name,
-		UUID idAuthor,
 		TemplateStatus status,
 		JsonNode body
 ) {
-	public CreateTemplateCommand toCommand() {
+	public CreateTemplateCommand toCommand(UUID idAuthor) {
 		return new CreateTemplateCommand(
 				this.name(),
-				this.idAuthor(),
+				idAuthor,
 				this.status(),
 				this.body()
 		);

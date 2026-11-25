@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 40px 20px;
+            color: #334155;
+        }
+
+        .container {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: 0 auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .brand-accent {
+            height: 6px;
+            width: 100%;
+            background: linear-gradient(90deg, #4f46e5 0%, #818cf8 100%);
+        }
+
+        .content-wrapper {
+            padding: 40px;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-container img {
+            height: 60px;
+        }
+
+        .content h1 {
+            font-size: 22px;
+            color: #0f172a;
+            margin-bottom: 24px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .content p {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .otp-container {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            margin: 32px 0;
+        }
+
+        .otp-code {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: 10px;
+            color: #4f46e5;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .security-note {
+            background-color: #f1f5f9;
+            border-left: 4px solid #cbd5e1;
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13.5px;
+            color: #475569;
+            margin-top: 32px;
+            line-height: 1.5;
+        }
+
+        .footer {
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 24px 40px;
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .footer strong {
+            color: #475569;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="brand-accent"></div>
+
+    <div class="content-wrapper">
+        <div class="logo-container">
+            <img src="cid:logoImage" alt="BYCONTRACT Logo" />
+        </div>
+
+        <div class="content">
+            <h1>Vérifiez votre adresse email</h1>
+            <p>Bonjour <span th:text="${firstName}">Client</span>,</p>
+            <p>Bienvenue sur <strong>BYCONTRACT</strong> ! Utilisez le code ci-dessous pour confirmer votre adresse email et finaliser la création de votre compte :</p>
+
+            <div class="otp-container">
+                <span class="otp-code" th:text="${otpCode}">123456</span>
+            </div>
+
+            <div class="security-note">
+                Ce code est valable pendant <strong>10 minutes</strong>.<br>
+                Si vous n'êtes pas à l'origine de cette demande, vous pouvez simplement ignorer cet email.
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 2026 <strong>Groupe BEYOND</strong>. Tous droits réservés.<br>
+    </div>
+</div>
+</body>
+</html>

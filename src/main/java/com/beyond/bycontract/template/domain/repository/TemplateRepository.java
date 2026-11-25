@@ -9,8 +9,8 @@ import java.util.UUID;
 public interface TemplateRepository {
 
 	Template createTemplate(Template template);
-
 	List<Template> getAllTemplates();
-
 	Optional<Template> findTemplateById(UUID id);
+	Template updateTemplate(Template template);
+	void deleteTemplateById(UUID id);
 }

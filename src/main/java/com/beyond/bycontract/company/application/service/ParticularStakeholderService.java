@@ -8,6 +8,9 @@ import com.beyond.bycontract.company.domain.model.Company;
 import com.beyond.bycontract.company.domain.model.ParticularStakeholder;
 import com.beyond.bycontract.company.domain.repository.ParticularStakeholderRepository;
 import com.beyond.bycontract.shared.utils.AuthorizationUtils;
+import com.beyond.bycontract.user.domain.exception.UserNotFoundException;
+import com.beyond.bycontract.user.domain.model.User;
+import com.beyond.bycontract.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +25,7 @@ import java.util.UUID;
 public class ParticularStakeholderService {
 
     private final ParticularStakeholderRepository repository;
+    private final UserRepository userRepository;
 
     private ParticularStakeholderResponse buildResponse(ParticularStakeholder stakeholder) {
         return new ParticularStakeholderResponse(
@@ -36,12 +40,24 @@ public class ParticularStakeholderService {
         );
     }
 
+    private void verifySubscription(UUID idUser) {
+        User user = userRepository.getUserById(idUser)
+                .orElseThrow(() -> new UserNotFoundException(idUser));
+
+        // 🚨 SÉCURITÉ : Vérification de l'abonnement
+        if (!user.hasActiveSubscription()) {
+            throw new IllegalStateException("Un abonnement actif est requis pour effectuer cette action.");
+        }
+    }
+
     @Transactional
     public ParticularStakeholderResponse create(CreateParticularStakeholderCommand command) {
         if (repository.existsByEmail(command.email())) {
             throw new RuntimeException("Un tiers particulier avec cet email existe déjà : " + command.email());
             // Idéalement, crée une exception personnalisée comme EmailAlreadyExistsException
         }
+
+        verifySubscription(command.idRequester());
 
         ParticularStakeholder stakeholder = ParticularStakeholder.create(
                 command.idRequester(),

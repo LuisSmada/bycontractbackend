@@ -34,8 +34,12 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
 			@NonNull HttpServletRequest request
 	) {
 		String path = request.getServletPath();
-		return HttpMethod.OPTIONS.matches(request.getMethod()) || "/api/v1/auth/login".equals(path)
-				|| "/api/v1/auth/register".equals(path);
+		return HttpMethod.OPTIONS.matches(request.getMethod()) ||
+				"/api/v1/auth/login".equals(path) ||
+				"/api/v1/auth/register".equals(path) ||
+				path.equals("/api/v1/webhooks/stripe") ||
+				path.startsWith("/swagger-ui/") ||
+				path.startsWith("/v3/api-docs/");
 	}
 
 	protected void doFilterInternal(

@@ -3,36 +3,40 @@ package com.beyond.bycontract.template.infrastructure.mapper;
 import com.beyond.bycontract.template.domain.model.Template;
 import com.beyond.bycontract.template.infrastructure.entity.TemplateEntity;
 import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
+import com.beyond.bycontract.user.infrastructure.repository.SpringDataUserRepository;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class TemplatePersistenceMapper {
+import java.util.UUID;
 
-	public static Template reconstituteDomain(TemplateEntity entity) {
-		return new Template(
-				entity.getId(),
-				entity.getName(),
-				entity.getBody(),
-				entity.getVariablesDefintion(),
-				entity.getStatus(),
-				entity.getUser().getId(),
-				entity.getCreatedAt(),
-				entity.getModifiedAt()
-		);
-	}
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
+public abstract class TemplatePersistenceMapper {
 
-	public static TemplateEntity toEntity(Template template) {
-		TemplateEntity entity = new TemplateEntity();
+    @Autowired
+    protected SpringDataUserRepository springDataUserRepository;
 
-		entity.setName(template.getName());
-		entity.setBody(template.getBody());
-		entity.setVariablesDefintion(template.getVariablesDefinition());
-		entity.setStatus(template.getStatus());
+    @Mapping(source = "user.id", target = "idAuthor")
+    public abstract  Template entityToDomain(TemplateEntity entity);
 
-		if (template.getIdAuthor() != null) {
-			UserEntity userEntity = new UserEntity();
-			userEntity.setId(template.getIdAuthor());
-			entity.setUser(userEntity);
-		}
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "modifiedAt", ignore = true)
+    @Mapping(source="idAuthor", target="user")
+    public abstract TemplateEntity domainToEntity(Template domain);
 
-		return entity;
-	}
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "modifiedAt", ignore = true)
+    @Mapping(source="idAuthor", target="user")
+    public abstract  void updateEntityFromDomain(Template domain, @MappingTarget TemplateEntity entityToUpdate);
+
+    protected UserEntity idToUserEntity(UUID idAuthor) {
+        if (idAuthor == null) {
+            return null;
+        }
+        return springDataUserRepository.getReferenceById(idAuthor);
+    }
 }

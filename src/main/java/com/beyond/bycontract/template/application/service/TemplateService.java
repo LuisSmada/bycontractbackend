@@ -1,8 +1,10 @@
 package com.beyond.bycontract.template.application.service;
 
+import com.beyond.bycontract.shared.utils.AuthorizationUtils;
 import com.beyond.bycontract.template.application.dto.CreateTemplateCommand;
 import com.beyond.bycontract.template.application.dto.FindTemplateResponse;
 import com.beyond.bycontract.template.application.dto.TemplateResponse;
+import com.beyond.bycontract.template.application.dto.UpdateTemplateCommand;
 import com.beyond.bycontract.template.domain.exception.TemplateNotFoundException;
 import com.beyond.bycontract.template.domain.model.Template;
 import com.beyond.bycontract.template.domain.repository.TemplateRepository;
@@ -12,6 +14,7 @@ import com.beyond.bycontract.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.function.Function;
@@ -96,5 +99,52 @@ public class TemplateService {
 				template.getCreatedAt(),
 				template.getModifiedAt()
 		);
+	}
+
+	private FindTemplateResponse buildFindTemplateResponse(Template template) {
+		User author = userRepository.getUserById(template.getIdAuthor())
+				.orElseThrow(() -> new UserNotFoundException(template.getIdAuthor()));
+
+		return new FindTemplateResponse(
+				template.getId(),
+				template.getName(),
+				new FindTemplateResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
+				template.getStatus(),
+				template.getBody(),
+				template.getVariablesDefinition(),
+				template.getCreatedAt(),
+				template.getModifiedAt()
+		);
+	}
+
+
+	@Transactional
+	public FindTemplateResponse updateTemplateById(UpdateTemplateCommand command) {
+		Template template = repository.findTemplateById(command.idTemplate())
+				.orElseThrow(() -> new TemplateNotFoundException(command.idTemplate()));
+
+		AuthorizationUtils.verifyOwnership(template.getIdAuthor(), command.idRequester());
+
+		template.update(
+				command.name(),
+				command.status(),
+				command.body(),
+				command.variablesDefinition()
+		);
+
+		Template updatedTemplate = repository.updateTemplate(template);
+
+
+		return buildFindTemplateResponse(updatedTemplate);
+	}
+
+	@Transactional
+	public void deleteTemplateById(UUID idTemplate, UUID idRequester) {
+		Template template = repository.findTemplateById(idTemplate)
+				.orElseThrow(() -> new TemplateNotFoundException(idTemplate));
+
+		AuthorizationUtils.verifyOwnership(template.getIdAuthor(), idRequester);
+
+		repository.deleteTemplateById(idTemplate);
 	}
 }
