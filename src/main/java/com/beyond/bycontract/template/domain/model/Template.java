@@ -2,6 +2,7 @@ package com.beyond.bycontract.template.domain.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @Getter
 @AllArgsConstructor
+@Builder
 public class Template {
 	private UUID id;
 	private String name;
