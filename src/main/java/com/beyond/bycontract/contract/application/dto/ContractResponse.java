@@ -36,5 +36,5 @@ public record ContractResponse(
 	) {
 	}
 
-	public record ParticularStakeholderDto(UUID id, String firstName, String lastName) {}
+	public record ParticularStakeholderDto(UUID id, String firstName, String lastName, String email) {}
 }

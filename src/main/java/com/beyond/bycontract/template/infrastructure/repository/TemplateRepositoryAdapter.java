@@ -1,5 +1,6 @@
 package com.beyond.bycontract.template.infrastructure.repository;
 
+import com.beyond.bycontract.template.domain.exception.TemplateNotFoundException;
 import com.beyond.bycontract.template.domain.model.Template;
 import com.beyond.bycontract.template.domain.repository.TemplateRepository;
 import com.beyond.bycontract.template.infrastructure.entity.TemplateEntity;
@@ -36,8 +37,13 @@ public class TemplateRepositoryAdapter implements TemplateRepository {
 
 	@Override
 	public Template updateTemplate(Template template) {
-		TemplateEntity entity = repository.save(mapper.domainToEntity(template));
-		return mapper.entityToDomain(entity);
+		TemplateEntity existingEntity = repository.findById(template.getId())
+				.orElseThrow(() -> new TemplateNotFoundException(template.getId()));
+
+		mapper.updateEntityFromDomain(template, existingEntity);
+
+		TemplateEntity savedEntity = repository.save(existingEntity);
+		return mapper.entityToDomain(savedEntity);
 	}
 
 	@Override

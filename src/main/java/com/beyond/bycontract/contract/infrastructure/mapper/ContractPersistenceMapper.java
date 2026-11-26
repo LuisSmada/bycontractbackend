@@ -75,7 +75,7 @@ public abstract class ContractPersistenceMapper {
 	// Garantit la liaison bidirectionnelle @OneToOne avant la sauvegarde Hibernate
 	@AfterMapping
 	protected void linkContent(@MappingTarget ContractEntity contractEntity) {
-		if (contractEntity.getContent() != null) {
+		if (contractEntity.getContent() != null && contractEntity.getContent().getContract() == null) {
 			contractEntity.getContent().setContract(contractEntity);
 		}
 	}
@@ -97,4 +97,13 @@ public abstract class ContractPersistenceMapper {
 	protected TemplateEntity idToTemplateEntity(UUID idTemplate) {
 		return idTemplate == null ? null : templateJpaRepository.getReferenceById(idTemplate);
 	}
+
+	// AJOUTE celle-ci (utilisée automatiquement par updateEntityFromDomain)
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "contract", ignore = true)
+	protected abstract void updateContentFromDomain(
+			ContractContent domain,
+			@MappingTarget ContractContentEntity entityToUpdate
+	);
+
 }

@@ -44,12 +44,26 @@ public class ContractService {
 	public ContractResponse create(CreateContractCommand command) throws Exception {
 
 		User author = userRepository.getUserById(command.idAuthor()).orElseThrow(() -> new UserNotFoundException("No user with id: " + command.idAuthor()));
-		Company stakeholder = companyRepository.getCompanyById(command.idCompany()).orElseThrow(() -> new CompanyNotFoundException("No company found with id: " + command.idCompany()));
-		ParticularStakeholder particularStakeholder = particularStakeholderRepository.getParticularStakeholderById(command.idParticularStakeholder()).orElseThrow(() -> new RuntimeException("No particular stakeholder found with id: " + command.idParticularStakeholder()));
 
-		//VERIFY THAT THE STAKEHOLDER IS REALLY FROM THE CONTACT OF THE CURRENT USER
-		if(!stakeholder.getIdCreator().equals(author.getId())) {
-			throw new AccessDeniedException("You do not have the authorization to use this stakeholder");
+		ContractResponse.CompanyDto companyDto = null;
+		ContractResponse.ParticularStakeholderDto particularDto = null;
+
+		if (command.idCompany() != null) {
+			Company company = companyRepository.getCompanyById(command.idCompany())
+					.orElseThrow(() -> new CompanyNotFoundException("No company found with id: " + command.idCompany()));
+			AuthorizationUtils.verifyOwnership(company.getIdCreator(), author.getId());
+			companyDto = new ContractResponse.CompanyDto(company.getId(), company.getName());
+		} else if (command.idParticularStakeholder() != null) {
+			ParticularStakeholder particular = particularStakeholderRepository
+					.getParticularStakeholderById(command.idParticularStakeholder())
+					.orElseThrow(() -> new RuntimeException("No particular stakeholder found with id: " + command.idParticularStakeholder()));
+			AuthorizationUtils.verifyOwnership(particular.getIdCreator(), author.getId());
+			particularDto = new ContractResponse.ParticularStakeholderDto(
+					particular.getId(),
+					particular.getFirstName(),
+					particular.getLastName(),
+					particular.getEmail()
+			);
 		}
 
 		Contract contract = Contract.create(
@@ -76,8 +90,8 @@ public class ContractService {
 				savedContract.getContractStatus(),
 				savedContract.getContractType(),
 				new ContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
-				new ContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName()),
-				new ContractResponse.ParticularStakeholderDto(particularStakeholder.getId(), particularStakeholder.getFirstName(), particularStakeholder.getLastName()),
+				companyDto,
+				particularDto,
 				savedContract.getCreatedAt(),
 				savedContract.getModifiedAt(),
 				savedContract.getExpirationDate(),
@@ -141,7 +155,7 @@ public class ContractService {
 			ContractResponse.ParticularStakeholderDto particularStakeholderDto = null;
 			if(contract.getIdParticularStakeholder() != null) {
 				ParticularStakeholder particularStakeholder = Optional.ofNullable(particularStakeholdersById.get(contract.getIdParticularStakeholder())).orElseThrow(() -> new RuntimeException("No particular stakeholder found with id: " + contract.getIdParticularStakeholder()));
-				particularStakeholderDto = new ContractResponse.ParticularStakeholderDto(particularStakeholder.getId(), particularStakeholder.getFirstName(), particularStakeholder.getLastName());
+				particularStakeholderDto = new ContractResponse.ParticularStakeholderDto(particularStakeholder.getId(), particularStakeholder.getFirstName(), particularStakeholder.getLastName(), particularStakeholder.getEmail());
 			}
 
 			return new ContractResponse(
@@ -164,9 +178,45 @@ public class ContractService {
 
 
 	private FindContractResponse buildFindContractResponse(Contract contract) {
-		User author = userRepository.getUserById(contract.getIdAuthor()).orElseThrow(() -> new UserNotFoundException(contract.getIdAuthor()));
-		Company stakeholder = companyRepository.getCompanyById(contract.getIdCompany()).orElseThrow(() -> new CompanyNotFoundException(contract.getIdCompany()));
-		ParticularStakeholder particularStakeholder = particularStakeholderRepository.getParticularStakeholderById(contract.getIdParticularStakeholder()).orElseThrow(() -> new RuntimeException("No particular stakeholder found with id: " + contract.getIdParticularStakeholder()));
+		User author = userRepository.getUserById(contract.getIdAuthor())
+				.orElseThrow(() -> new UserNotFoundException(contract.getIdAuthor()));
+
+		FindContractResponse.CompanyDto companyDto = null;
+		if (contract.getIdCompany() != null) {
+			Company stakeholder = companyRepository.getCompanyById(contract.getIdCompany())
+					.orElseThrow(() -> new CompanyNotFoundException(contract.getIdCompany()));
+
+			FindContractResponse.MainContactDtoFC mainContactDto = null;
+			if (stakeholder.getMainContactCompany() != null) {
+				mainContactDto = new FindContractResponse.MainContactDtoFC(
+						stakeholder.getMainContactCompany().getFirstName(),
+						stakeholder.getMainContactCompany().getLastName(),
+						stakeholder.getMainContactCompany().getEmail(),
+						stakeholder.getMainContactCompany().getPhone()
+				);
+			}
+
+			companyDto = new FindContractResponse.CompanyDto(
+					stakeholder.getId(),
+					stakeholder.getName(),
+					stakeholder.getSiret(),
+					mainContactDto
+			);
+		}
+
+		FindContractResponse.ParticularStakeholderDto particularDto = null;
+		if (contract.getIdParticularStakeholder() != null) {
+			ParticularStakeholder particularStakeholder = particularStakeholderRepository
+					.getParticularStakeholderById(contract.getIdParticularStakeholder())
+					.orElseThrow(() -> new RuntimeException("No particular stakeholder found with id: " + contract.getIdParticularStakeholder()));
+
+			particularDto = new FindContractResponse.ParticularStakeholderDto(
+					particularStakeholder.getId(),
+					particularStakeholder.getFirstName(),
+					particularStakeholder.getLastName(),
+					particularStakeholder.getEmail()
+			);
+		}
 
 		return new FindContractResponse(
 				contract.getId(),
@@ -181,17 +231,8 @@ public class ContractService {
 				contract.getValue(),
 				contract.getVersion(),
 				new FindContractResponse.AuthorDto(author.getId(), author.getFirstName(), author.getLastName()),
-				new FindContractResponse.CompanyDto(stakeholder.getId(), stakeholder.getName(), stakeholder.getSiret(), new FindContractResponse.MainContactDtoFC(
-						stakeholder.getMainContactCompany().getFirstName(),
-						stakeholder.getMainContactCompany().getLastName(),
-						stakeholder.getMainContactCompany().getEmail(),
-						stakeholder.getMainContactCompany().getPhone()
-				) ),
-				new FindContractResponse.ParticularStakeholderDto(
-						particularStakeholder.getId(),
-						particularStakeholder.getFirstName(),
-						particularStakeholder.getLastName()
-				),
+				companyDto,
+				particularDto,
 				new FindContractResponse.ContractContentDto(
 						contract.getContractContent().getBody(),
 						contract.getContractContent().getPlainText(),
