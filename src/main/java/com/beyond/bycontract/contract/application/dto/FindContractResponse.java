@@ -23,6 +23,7 @@ public record FindContractResponse(
 		Integer version,
 		AuthorDto author,
 		CompanyDto company,
+		ParticularStakeholderDto particularStakeholder,
 		ContractContentDto content,
 		UUID idTemplate
 ) {
@@ -62,4 +63,6 @@ public record FindContractResponse(
 			String name
 	) {
 	}
+
+	public record ParticularStakeholderDto(UUID id, String firstName, String lastName) {}
 }

@@ -2,19 +2,23 @@ package com.beyond.bycontract.contract.domain.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-
+@Getter
+@AllArgsConstructor
 public class Contract {
 	private UUID id;
 	private String name;
 	private ContractType contractType;
 	private ContractStatus contractStatus;
 	private UUID idCompany;
+	private UUID idParticularStakeholder;
 	private UUID idAuthor;
 	private UUID idTemplate;
 	private LocalDate effectiveDate;
@@ -27,59 +31,38 @@ public class Contract {
 	private LocalDateTime modifiedAt;
 	private Integer version;
 
-	public Contract() {
+
+	private static void validateStakeholderXor(UUID idCompany, UUID idParticularStakeholder) {
+		boolean hasCompany = idCompany != null;
+		boolean hasParticular = idParticularStakeholder != null;
+		if (hasCompany == hasParticular) {
+			throw new IllegalArgumentException("Un contrat doit être associé soit à une entreprise, soit à un particulier (pas les deux, ni aucun).");
+		}
 	}
 
-	//CONSTRUCTOR FOR THE CREATION OF A CONTRACT
-	public Contract(String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, ContractContent contractContent, LocalDateTime createdAt, LocalDateTime modifiedAt) {
-		this.name = name;
-		this.contractType = contractType;
-		this.contractStatus = contractStatus;
-		this.idCompany = idCompany;
-		this.idAuthor = idAuthor;
-		this.idTemplate = idTemplate;
-		this.effectiveDate = effectiveDate;
-		this.expirationDate = expirationDate;
-		this.autoRenew = autoRenew;
-		this.value = value;
-		this.contractContent = contractContent;
-		this.createdAt = createdAt;
-		this.modifiedAt = modifiedAt;
-	}
-
-	public Contract(UUID id, String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, ContractContent contractContent, LocalDateTime createdAt, LocalDateTime modifiedAt, Integer version ) {
-		this.id = id;
-		this.name = name;
-		this.contractType = contractType;
-		this.contractStatus = contractStatus;
-		this.idCompany = idCompany;
-		this.idAuthor = idAuthor;
-		this.idTemplate = idTemplate;
-		this.effectiveDate = effectiveDate;
-		this.expirationDate = expirationDate;
-		this.autoRenew = autoRenew;
-		this.value = value;
-		this.contractContent = contractContent;
-		this.createdAt = createdAt;
-		this.modifiedAt = modifiedAt;
-		this.version = version;
-	}
-
-	public static Contract create(String name, ContractType contractType, ContractStatus contractStatus, UUID idCompany, UUID idAuthor, UUID idTemplate, LocalDate effectiveDate, LocalDate expirationDate, Boolean autoRenew, BigDecimal value, JsonNode body, String plainText) throws Exception {
+	public static Contract create(
+			String name, ContractType contractType, ContractStatus contractStatus,
+			UUID idCompany, UUID idParticularStakeholder,
+			UUID idAuthor, UUID idTemplate, LocalDate effectiveDate,
+			LocalDate expirationDate, Boolean autoRenew, BigDecimal value,
+			JsonNode body, String plainText
+	) {
+		validateStakeholderXor(idCompany, idParticularStakeholder);
 
 		if (body == null && plainText == null) {
 			throw new IllegalStateException("Cannot create a contract without text");
 		}
 
 		ContractContent newContent = new ContractContent(body, plainText, null, LocalDateTime.now());
-
-		LocalDate finalExpirationDate = autoRenew == true ? null : expirationDate;
+		LocalDate finalExpirationDate = Boolean.TRUE.equals(autoRenew) ? null : expirationDate;
 
 		return new Contract(
+				null,
 				name,
 				contractType,
 				contractStatus,
 				idCompany,
+				idParticularStakeholder,
 				idAuthor,
 				idTemplate,
 				effectiveDate,
@@ -88,11 +71,12 @@ public class Contract {
 				value,
 				newContent,
 				LocalDateTime.now(),
-				LocalDateTime.now()
+				LocalDateTime.now(),
+				null
 		);
 	}
 
-	public void update(String newName, ContractType newContractType, ContractStatus newContractStatus, UUID newIdCompany, LocalDate newEffectiveDate, LocalDate newExpirationDate, Boolean newAutoRenew, BigDecimal newValue, JsonNode newBody, String newPlainText) {
+	public void update(String newName, ContractType newContractType, ContractStatus newContractStatus, UUID newIdCompany, UUID newIdParticularStakeholder, LocalDate newEffectiveDate, LocalDate newExpirationDate, Boolean newAutoRenew, BigDecimal newValue, JsonNode newBody, String newPlainText) {
 
 		if(newName != null && !newName.trim().isEmpty()) {
 			this.name = newName;
@@ -106,8 +90,17 @@ public class Contract {
 			this.contractStatus = newContractStatus;
 		}
 
-		if(newIdCompany != null) {
+		if (newIdCompany != null && newIdParticularStakeholder != null) {
+			throw new IllegalArgumentException("Impossible d'associer à la fois une entreprise et un particulier.");
+		}
+
+		// Bascule propre (XOR préservé)
+		if (newIdCompany != null) {
 			this.idCompany = newIdCompany;
+			this.idParticularStakeholder = null;
+		} else if (newIdParticularStakeholder != null) {
+			this.idParticularStakeholder = newIdParticularStakeholder;
+			this.idCompany = null;
 		}
 
 		if(newEffectiveDate != null) {
@@ -133,85 +126,6 @@ public class Contract {
 		}
 
 		this.modifiedAt = LocalDateTime.now();
-	}
-
-
-	public UUID getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public ContractType getContractType() {
-		return contractType;
-	}
-
-	public ContractStatus getContractStatus() {
-		return contractStatus;
-	}
-
-	public UUID getIdCompany() {
-		return idCompany;
-	}
-
-	public UUID getIdAuthor() {
-		return idAuthor;
-	}
-
-	public UUID getIdTemplate() {
-		return idTemplate;
-	}
-
-	public LocalDate getEffectiveDate() {
-		return effectiveDate;
-	}
-
-	public LocalDate getExpirationDate() {
-		return expirationDate;
-	}
-
-	public Boolean getAutoRenew() {
-		return autoRenew;
-	}
-
-	public BigDecimal getValue() {
-		return value;
-	}
-
-	public ContractContent getContractContent() {
-		return contractContent;
-	}
-
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public LocalDateTime getModifiedAt() {
-		return modifiedAt;
-	}
-
-	public Integer getVersion() { return version; }
-
-	@Override
-	public String toString() {
-		return "Contract{" +
-				"id=" + id +
-				", name='" + name + '\'' +
-				", contractType=" + contractType +
-				", contractStatus=" + contractStatus +
-				", idCompany=" + idCompany +
-				", idAuthor=" + idAuthor +
-				", idTemplate=" + idTemplate +
-				", effectiveDate=" + effectiveDate +
-				", expirationDate=" + expirationDate +
-				", autoRenew=" + autoRenew +
-				", value=" + value +
-				", idContractContent=" + contractContent.getId() +
-				", createdAt=" + createdAt +
-				", modifiedAt=" + modifiedAt +
-				'}';
 	}
 
 

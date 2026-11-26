@@ -1,96 +1,100 @@
 package com.beyond.bycontract.contract.infrastructure.mapper;
 
 import com.beyond.bycontract.company.infrastructure.entity.CompanyEntity;
+import com.beyond.bycontract.company.infrastructure.entity.ParticularStakeholderEntity;
+import com.beyond.bycontract.company.infrastructure.repository.JpaCompanyRepository;
+import com.beyond.bycontract.company.infrastructure.repository.JpaParticularStakeholderRepository;
 import com.beyond.bycontract.contract.domain.model.Contract;
 import com.beyond.bycontract.contract.domain.model.ContractContent;
 import com.beyond.bycontract.contract.infrastructure.entity.ContractContentEntity;
 import com.beyond.bycontract.contract.infrastructure.entity.ContractEntity;
 import com.beyond.bycontract.template.infrastructure.entity.TemplateEntity;
+import com.beyond.bycontract.template.infrastructure.repository.JpaTemplateRepository;
 import com.beyond.bycontract.user.infrastructure.entity.UserEntity;
+import com.beyond.bycontract.user.infrastructure.repository.SpringDataUserRepository;
+import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class ContractPersistenceMapper {
+import java.util.UUID;
 
-	public static Contract reconstituteDomain(ContractEntity entity) {
-		try {
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
+public abstract class ContractPersistenceMapper {
 
-			ContractContent contractContent = new ContractContent(
-					entity.getContent().getBody(),
-					entity.getContent().getPlainText(),
-					entity.getContent().getSignedPdfKey(),
-					entity.getContent().getModifiedAt()
-			);
+	@Autowired
+	protected SpringDataUserRepository userJpaRepository;
 
-			return new Contract(
-					entity.getId(),
-					entity.getName(),
-					entity.getContractType(),
-					entity.getContractStatus(),
-					entity.getCompany() != null ? entity.getCompany().getId() : null,
-					entity.getAuthor() != null ? entity.getAuthor().getId() : null,
-					entity.getTemplate() != null ? entity.getTemplate().getId() : null,
-					entity.getEffectiveDate(),
-					entity.getExpirationDate(),
-					entity.getAutoRenew(),
-					entity.getValue(),
-					contractContent,
-					entity.getCreatedAt(),
-					entity.getModifiedAt(),
-					entity.getVersion()
-			);
-		} catch (Exception e) {
-			throw new RuntimeException("Erreur de mapping BDD -> Domaine", e);
+	@Autowired
+	protected JpaCompanyRepository companyJpaRepository;
+
+	@Autowired
+	protected JpaParticularStakeholderRepository particularStakeholderJpaRepository;
+
+	@Autowired
+	protected JpaTemplateRepository templateJpaRepository;
+
+	// 1. BDD -> Domaine
+	@Mapping(source = "company.id", target = "idCompany")
+	@Mapping(source = "particularStakeholder.id", target = "idParticularStakeholder")
+	@Mapping(source = "author.id", target = "idAuthor")
+	@Mapping(source = "template.id", target = "idTemplate")
+	@Mapping(source = "content", target = "contractContent")
+	public abstract Contract entityToDomain(ContractEntity entity);
+
+	// 2. Domaine -> BDD (Création)
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "modifiedAt", ignore = true)
+	@Mapping(target = "version", ignore = true)
+	@Mapping(source = "idCompany", target = "company")
+	@Mapping(source = "idParticularStakeholder", target = "particularStakeholder")
+	@Mapping(source = "idAuthor", target = "author")
+	@Mapping(source = "idTemplate", target = "template")
+	@Mapping(source = "contractContent", target = "content")
+	public abstract ContractEntity domainToEntity(Contract domain);
+
+	// 3. Domaine -> BDD (Mise à jour)
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "modifiedAt", ignore = true)
+	@Mapping(target = "version", ignore = true)
+	@Mapping(source = "idCompany", target = "company")
+	@Mapping(source = "idParticularStakeholder", target = "particularStakeholder")
+	@Mapping(source = "idAuthor", target = "author")
+	@Mapping(source = "idTemplate", target = "template")
+	@Mapping(source = "contractContent", target = "content")
+	public abstract void updateEntityFromDomain(Contract domain, @MappingTarget ContractEntity entityToUpdate);
+
+	// --- Sous-mappings pour ContractContent ---
+
+	protected abstract ContractContent contentEntityToDomain(ContractContentEntity entity);
+
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "contract", ignore = true)
+	protected abstract ContractContentEntity contentDomainToEntity(ContractContent domain);
+
+	// Garantit la liaison bidirectionnelle @OneToOne avant la sauvegarde Hibernate
+	@AfterMapping
+	protected void linkContent(@MappingTarget ContractEntity contractEntity) {
+		if (contractEntity.getContent() != null) {
+			contractEntity.getContent().setContract(contractEntity);
 		}
-
 	}
 
+	// --- Conversion UUID -> Référence JPA (sans SELECT en BDD) ---
 
-	public static ContractEntity toEntity(Contract contract) {
-		ContractEntity contractEntity = new ContractEntity();
+	protected UserEntity idToUserEntity(UUID idAuthor) {
+		return idAuthor == null ? null : userJpaRepository.getReferenceById(idAuthor);
+	}
 
-		contractEntity.setName(contract.getName());
-		contractEntity.setContractType(contract.getContractType());
-		contractEntity.setContractStatus(contract.getContractStatus());
-		contractEntity.setEffectiveDate(contract.getEffectiveDate());
-		contractEntity.setExpirationDate(contract.getExpirationDate());
-		contractEntity.setAutoRenew(contract.getAutoRenew());
-		contractEntity.setValue(contract.getValue());
+	protected CompanyEntity idToCompanyEntity(UUID idCompany) {
+		return idCompany == null ? null : companyJpaRepository.getReferenceById(idCompany);
+	}
 
-		/* Note technique : Pour lier l'auteur et l'entreprise sans faire de SELECT en BDD,
-          utilise entityManager.getReference(CompanyEntity.class, contract.getIdCompany());
-          Ici je garde ta logique actuelle pour la simplicité */
+	protected ParticularStakeholderEntity idToParticularStakeholderEntity(UUID idParticularStakeholder) {
+		return idParticularStakeholder == null ? null : particularStakeholderJpaRepository.getReferenceById(idParticularStakeholder);
+	}
 
-		if (contract.getIdCompany() != null) {
-			CompanyEntity companyEntity = new CompanyEntity();
-			companyEntity.setId(contract.getIdCompany());
-
-			contractEntity.setCompany(companyEntity);
-		}
-
-		if (contract.getIdAuthor() != null) {
-			UserEntity userEntity = new UserEntity();
-			userEntity.setId(contract.getIdAuthor());
-
-			contractEntity.setAuthor(userEntity);
-		}
-
-		if (contract.getIdTemplate() != null) {
-			TemplateEntity templateEntity = new TemplateEntity();
-			templateEntity.setId(contract.getIdTemplate());
-
-			contractEntity.setTemplate(templateEntity);
-		}
-
-		if (contract.getContractContent() != null) {
-			ContractContentEntity contractContentEntity = new ContractContentEntity();
-			contractContentEntity.setBody(contract.getContractContent().getBody());
-			contractContentEntity.setPlainText(contract.getContractContent().getPlainText());
-			contractContentEntity.setSignedPdfKey(contract.getContractContent().getSignedPdfKey());
-			contractContentEntity.setContract(contractEntity);
-			contractEntity.setContent(contractContentEntity);
-		}
-
-		//createdAt, modifiedAt and version are not added because they are not updatable and not insertable through an entity,so it's useless to add it
-
-		return contractEntity;
+	protected TemplateEntity idToTemplateEntity(UUID idTemplate) {
+		return idTemplate == null ? null : templateJpaRepository.getReferenceById(idTemplate);
 	}
 }

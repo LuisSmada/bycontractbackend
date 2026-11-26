@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,6 +42,12 @@ public class ParticularStakeholderRepositoryAdapter implements ParticularStakeho
     @Override
     public List<ParticularStakeholder> getParticularStakeholdersByIdCreator(UUID idCreator) {
         return jpaRepository.findAllByIdCreator(idCreator).stream()
+                .map(ParticularStakeholderPersistenceMapper::reconstituteDomain).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ParticularStakeholder> getParticularStakeholdersByIds(Collection<UUID> ids) {
+        return jpaRepository.findAllById(ids).stream()
                 .map(ParticularStakeholderPersistenceMapper::reconstituteDomain).collect(Collectors.toList());
     }
 

@@ -12,6 +12,7 @@ public record CreateContractCommand(
 		String name,
 		UUID idAuthor,
 		UUID idCompany,
+		UUID idParticularStakeholder,
 		UUID idTemplate,
 		String bodyText,
 		JsonNode bodyJson,

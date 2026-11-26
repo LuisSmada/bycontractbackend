@@ -15,6 +15,7 @@ public record UpdateContractCommand (
          UUID idRequester,
          String name,
          UUID idCompany,
+            UUID idParticularStakeholder,
          String bodyText,
          JsonNode bodyJson,
          LocalDate effectiveDate,

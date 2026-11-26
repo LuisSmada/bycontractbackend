@@ -16,6 +16,7 @@ public record ContractResponse(
 		ContractType type,
 		AuthorDto author,
 		CompanyDto company,
+		ParticularStakeholderDto particularStakeholder,
 		LocalDateTime createdAt,
 		LocalDateTime modifiedAt,
 		LocalDate expirationDate,
@@ -34,4 +35,6 @@ public record ContractResponse(
 			String name
 	) {
 	}
+
+	public record ParticularStakeholderDto(UUID id, String firstName, String lastName) {}
 }
