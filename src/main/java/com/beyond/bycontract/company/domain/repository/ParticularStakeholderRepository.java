@@ -15,7 +15,7 @@ public interface ParticularStakeholderRepository {
     void deleteById(UUID id);
     Optional<ParticularStakeholder> getParticularStakeholderById(UUID id);
     ParticularStakeholder updateById(ParticularStakeholder particularStakeholder);
-    Page<ParticularStakeholder> getAllParticularStakeholders(Pageable pageable);
+    List<ParticularStakeholder> getAllParticularStakeholders();
     boolean existsByEmail(String email);
     List<ParticularStakeholder> getParticularStakeholdersByIdCreator(UUID idCreator);
     List<ParticularStakeholder> getParticularStakeholdersByIds(Collection<UUID> ids);

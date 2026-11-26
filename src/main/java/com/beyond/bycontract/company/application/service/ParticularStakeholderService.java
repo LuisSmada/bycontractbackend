@@ -80,16 +80,16 @@ public class ParticularStakeholderService {
         return buildResponse(stakeholder);
     }
 
-    public Page<ParticularStakeholderResponse> getAll(Pageable pageable) {
+    public List<ParticularStakeholderResponse> getAll(UUID idCreator) {
         // La méthode .map() sur un objet Page (Spring Data) convertit automatiquement
         // le contenu tout en conservant les métadonnées (total elements, total pages, etc.)
-        return repository.getAllParticularStakeholders(pageable)
-                .map(this::buildResponse);
+        List<ParticularStakeholder> allParticularStakeholders = idCreator == null ? repository.getAllParticularStakeholders() : repository.getParticularStakeholdersByIdCreator(idCreator);
+
+        return allParticularStakeholders.stream()
+                .map(this::buildResponse)
+                .toList();
     }
 
-    public List<ParticularStakeholderResponse> getAllByIdCreator(UUID idCreator) {
-        return repository.getParticularStakeholdersByIdCreator(idCreator).stream().map(this::buildResponse).toList();
-    }
 
     @Transactional
     public ParticularStakeholderResponse updateById(UUID id, UpdateParticularStakeholderCommand command) {

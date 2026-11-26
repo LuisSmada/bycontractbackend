@@ -35,16 +35,15 @@ public class ParticularStakeholderController {
     }
 
     @GetMapping("/all-particulars")
-    public Page<ParticularStakeholderResponse> getAllParticularsForAdmin(
-            // @PageableDefault définit des valeurs par défaut si le client (Next.js) n'envoie pas les paramètres
-            @PageableDefault(size = 20, sort = "lastName") Pageable pageable
-    ) {
-        return service.getAll(pageable);
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ParticularStakeholderResponse> getAllParticularsForAdmin() {
+        return service.getAll(null);
     }
 
     @GetMapping
     public List<ParticularStakeholderResponse> getAll(@AuthenticationPrincipal CustomUserDetails currentUser) {
-        return service.getAllByIdCreator(currentUser.getId());
+        return service.getAll(currentUser.getId());
     }
 
     @GetMapping("/{id}")

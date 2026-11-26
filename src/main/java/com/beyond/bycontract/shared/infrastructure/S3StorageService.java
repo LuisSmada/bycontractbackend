@@ -1,17 +1,22 @@
 package com.beyond.bycontract.shared.infrastructure;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -57,5 +62,36 @@ public class S3StorageService {
                 .getObjectRequest(getObjectRequest).build();
 
         return s3Presigner.presignGetObject(presignRequest).url().toString();
+    }
+
+    public record S3ObjectContent(byte[] content, String contentType) {}
+
+    public void uploadBytes(String key, byte[] content, String contentType) {
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .contentType(contentType)
+                .build();
+
+        s3Client.putObject(putObjectRequest, RequestBody.fromBytes(content));
+    }
+
+    public Optional<S3ObjectContent> downloadBytes(String key) {
+        try {
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+
+            ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(getObjectRequest);
+            String contentType = objectBytes.response().contentType();
+
+            return Optional.of(new S3ObjectContent(
+                    objectBytes.asByteArray(),
+                    contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM_VALUE
+            ));
+        } catch (NoSuchKeyException e) {
+            return Optional.empty();
+        }
     }
 }

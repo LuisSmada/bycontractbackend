@@ -34,9 +34,9 @@ public class ParticularStakeholderRepositoryAdapter implements ParticularStakeho
     }
 
     @Override
-    public Page<ParticularStakeholder> getAllParticularStakeholders(Pageable pageable) {
-        return jpaRepository.findAll(pageable)
-                .map(ParticularStakeholderPersistenceMapper::reconstituteDomain);
+    public List<ParticularStakeholder> getAllParticularStakeholders() {
+        return jpaRepository.findAll().stream()
+                .map(ParticularStakeholderPersistenceMapper::reconstituteDomain).toList();
     }
 
     @Override
